@@ -313,7 +313,7 @@ form.addEventListener('submit', e => {
     requiredFields.push('visitationDate', 'visitationTime');
   }
   
-  const missingFields = requiredFields.filter(field => !newEntry[field].trim());
+  const missingFields = requiredFields.filter(field => !( (newEntry[field] || '').trim() ));
   
   if (missingFields.length > 0) {
     showNotification(`Please fill in all required fields: ${missingFields.join(', ')}`, 'error');

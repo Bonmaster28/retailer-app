@@ -1,4 +1,4 @@
-const CACHE_NAME = 'retailerpro-v1.2.0';
+const CACHE_NAME = 'retailerpro-v1.2.1';
 const urlsToCache = [
   './',
   './index.html',
@@ -10,6 +10,8 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', function(event) {
+  // Activate new service worker immediately
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
@@ -43,6 +45,9 @@ self.addEventListener('activate', function(event) {
           }
         })
       );
+    }).then(function() {
+      // Claim clients so the new SW starts controlling pages immediately
+      return self.clients.claim();
     })
   );
 });
