@@ -1,5 +1,4 @@
-[file name]: index.html
-[file content begin]
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,25 +35,23 @@
             <option value="TSM">TSM</option>
           </select>
         </div>
+
+        <!-- Password field for DSR demo -->
+        <div class="form-group" id="passwordGroup" style="display: none;">
+          <label for="password">Password *</label>
+          <input type="password" id="password" name="password" 
+                 placeholder="Enter password" />
+          <div class="demo-hint">
+            <small>DSR Demo: Use phone 786478620 with password "demo123"</small>
+          </div>
+        </div>
         
-        <button type="submit" class="btn-primary">Send OTP</button>
+        <button type="submit" class="btn-primary" id="loginBtn">Login</button>
       </form>
       
-      <div id="otpSection" class="otp-section" style="display: none;">
-        <div class="form-group">
-          <label for="otp">Enter OTP *</label>
-          <input type="text" id="otp" name="otp" required 
-                 placeholder="Enter 6-digit OTP" pattern="[0-9]{6}" maxlength="6" />
-        </div>
-        <div class="otp-actions">
-          <button type="button" id="verifyOtpBtn" class="btn-primary">Verify OTP</button>
-          <button type="button" id="resendOtpBtn" class="btn-secondary">Resend OTP</button>
-        </div>
-      </div>
-      
       <div class="login-footer">
-        <p>Use your Airtel number to login. OTP will be sent for verification.</p>
-        <p><strong>DSR Demo:</strong> Use 7846478620</p>
+        <p><strong>DSR Demo:</strong> Use 786478620 with password "demo123"</p>
+        <p><strong>Other Users:</strong> Enter any phone number and select role</p>
       </div>
     </div>
   </div>

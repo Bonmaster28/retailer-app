@@ -1,23 +1,22 @@
 
-// Consolidated application script with DSR prospect management
-// Features: OTP demo, TSM date/time auto-lock, prospect management, tab system
+
+// Consolidated application script with simplified login
+// Features: Password-based auth for DSR demo, prospect management, tab system
 
 (() => {
   // DOM references
   const loginSection = document.getElementById('loginSection');
   const appSection = document.getElementById('appSection');
   const loginForm = document.getElementById('loginForm');
-  const otpSection = document.getElementById('otpSection');
-  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-  const resendOtpBtn = document.getElementById('resendOtpBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const userRoleDisplay = document.getElementById('userRoleDisplay');
   const userPhoneDisplay = document.getElementById('userPhoneDisplay');
+  const passwordGroup = document.getElementById('passwordGroup');
+  const userRoleSelect = document.getElementById('userRole');
 
   // Tab elements
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
-  const prospectTabButton = document.getElementById('prospectTabButton');
 
   // Retailer form elements
   const form = document.getElementById('dataForm');
@@ -48,7 +47,6 @@
   let data = JSON.parse(localStorage.getItem('retailerData')) || [];
   let prospects = JSON.parse(localStorage.getItem('prospectData')) || [];
   let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-  let otpData = JSON.parse(localStorage.getItem('otpData')) || {};
 
   const uiStateKey = 'tableUIState';
   let uiState = JSON.parse(localStorage.getItem(uiStateKey)) || {
@@ -105,12 +103,17 @@
 
   // Setup event listeners
   function setupEventListeners() {
+    // Show/hide password field based on role selection
+    userRoleSelect.addEventListener('change', function() {
+      if (this.value === 'DSR') {
+        passwordGroup.style.display = 'block';
+      } else {
+        passwordGroup.style.display = 'none';
+      }
+    });
+
     // Login form submission
     loginForm.addEventListener('submit', handleLoginSubmit);
-
-    // OTP verification
-    verifyOtpBtn.addEventListener('click', verifyOtp);
-    resendOtpBtn.addEventListener('click', resendOtp);
 
     // Logout
     logoutBtn.addEventListener('click', handleLogout);
@@ -151,6 +154,9 @@
     // Lock date/time fields for TSM
     document.getElementById('visitationDate').readOnly = true;
     document.getElementById('visitationTime').readOnly = true;
+
+    // Set default follow-up date to today
+    document.getElementById('followUpDate').valueAsDate = new Date();
   }
 
   // Login handler
@@ -158,70 +164,32 @@
     e.preventDefault();
     const phoneNumber = document.getElementById('phoneNumber').value;
     const userRole = document.getElementById('userRole').value;
+    const password = document.getElementById('password')?.value;
 
-    // Demo OTP for DSR number 784478620
-    if (phoneNumber === '784478620' && userRole === 'DSR') {
-      // Pre-approved DSR login
-      const demoOtp = '123456';
-      otpData = { phoneNumber, otp: demoOtp, timestamp: Date.now() };
-      localStorage.setItem('otpData', JSON.stringify(otpData));
-      
-      document.getElementById('otp').value = demoOtp;
-      otpSection.style.display = 'block';
-      showNotification(`OTP sent to ${phoneNumber}. Use ${demoOtp} to login.`, 'success');
+    // Validate phone number format
+    if (!phoneNumber.startsWith('254') || phoneNumber.length !== 12) {
+      showNotification('Please enter a valid Airtel Kenya number starting with 254 (12 digits)', 'error');
+      return;
+    }
+
+    // DSR demo authentication
+    if (userRole === 'DSR') {
+      if (phoneNumber === '786478620' && password === 'demo123') {
+        // Successful DSR demo login
+        currentUser = { phoneNumber, role: userRole, isDemo: true };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        showApp();
+        showNotification('DSR Demo Login successful!', 'success');
+      } else {
+        showNotification('Invalid DSR credentials. Use phone 786478620 and password "demo123"', 'error');
+        return;
+      }
     } else {
-      // Generate random OTP for other numbers
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      otpData = { phoneNumber, otp, timestamp: Date.now() };
-      localStorage.setItem('otpData', JSON.stringify(otpData));
-      
-      otpSection.style.display = 'block';
-      showNotification(`OTP sent to ${phoneNumber}`, 'success');
-    }
-  }
-
-  // OTP verification
-  function verifyOtp() {
-    const enteredOtp = document.getElementById('otp').value;
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    const userRole = document.getElementById('userRole').value;
-
-    if (!otpData.otp) {
-      showNotification('Please request an OTP first', 'error');
-      return;
-    }
-
-    // Check if OTP is expired (10 minutes)
-    if (Date.now() - otpData.timestamp > 10 * 60 * 1000) {
-      showNotification('OTP has expired. Please request a new one.', 'error');
-      return;
-    }
-
-    if (enteredOtp === otpData.otp && phoneNumber === otpData.phoneNumber) {
+      // TSM or other roles - simple authentication without password
       currentUser = { phoneNumber, role: userRole };
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       showApp();
-      showNotification('Login successful!', 'success');
-    } else {
-      showNotification('Invalid OTP', 'error');
-    }
-  }
-
-  // Resend OTP
-  function resendOtp() {
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    const userRole = document.getElementById('userRole').value;
-    
-    if (phoneNumber === '7846478620' && userRole === 'DSR') {
-      const demoOtp = '123456';
-      otpData = { phoneNumber, otp: demoOtp, timestamp: Date.now() };
-      localStorage.setItem('otpData', JSON.stringify(otpData));
-      showNotification(`OTP resent to ${phoneNumber}. Use ${demoOtp} to login.`, 'success');
-    } else {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      otpData = { phoneNumber, otp, timestamp: Date.now() };
-      localStorage.setItem('otpData', JSON.stringify(otpData));
-      showNotification(`OTP resent to ${phoneNumber}`, 'success');
+      showNotification(`Welcome ${userRole}! Login successful.`, 'success');
     }
   }
 
@@ -248,8 +216,8 @@
   function showLogin() {
     loginSection.style.display = 'flex';
     appSection.style.display = 'none';
-    otpSection.style.display = 'none';
     loginForm.reset();
+    passwordGroup.style.display = 'none';
   }
 
   // Logout handler
@@ -281,8 +249,10 @@
     const formData = new FormData(form);
     const entry = Object.fromEntries(formData.entries());
     
-    // Add timestamp
+    // Add timestamp and user info
     entry.timestamp = new Date().toISOString();
+    entry.addedBy = currentUser.phoneNumber;
+    entry.userRole = currentUser.role;
     
     // Add to data array
     data.push(entry);
@@ -305,8 +275,10 @@
     const formData = new FormData(prospectForm);
     const entry = Object.fromEntries(formData.entries());
     
-    // Add timestamp and initial status
+    // Add timestamp, user info and initial status
     entry.timestamp = new Date().toISOString();
+    entry.addedBy = currentUser.phoneNumber;
+    entry.userRole = currentUser.role;
     entry.status = 'Pending';
     
     // Add to prospects array
@@ -326,11 +298,13 @@
   // Clear retailer form
   function clearForm() {
     form.reset();
-    // Reset date and time to current
-    document.getElementById('visitationDate').valueAsDate = new Date();
-    const now = new Date();
-    document.getElementById('visitationTime').value = 
-      `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    // Reset date and time to current for TSM
+    if (currentUser.role === 'TSM') {
+      document.getElementById('visitationDate').valueAsDate = new Date();
+      const now = new Date();
+      document.getElementById('visitationTime').value = 
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
   }
 
   // Clear prospect form
@@ -365,11 +339,27 @@
   // Update retailer entry count
   function updateEntryCount() {
     entryCount.textContent = data.length;
+    // Color code based on count
+    if (data.length >= 2000) {
+      entryCount.style.color = '#dc3545';
+    } else if (data.length >= 1500) {
+      entryCount.style.color = '#ffc107';
+    } else {
+      entryCount.style.color = '#28a745';
+    }
   }
 
   // Update prospect count
   function updateProspectCount() {
     prospectCount.textContent = prospects.length;
+    // Color code based on count
+    if (prospects.length >= 500) {
+      prospectCount.style.color = '#dc3545';
+    } else if (prospects.length >= 400) {
+      prospectCount.style.color = '#ffc107';
+    } else {
+      prospectCount.style.color = '#28a745';
+    }
   }
 
   // Render retailer table with pagination and search
@@ -415,39 +405,53 @@
     
     // Render table rows
     tableBody.innerHTML = '';
-    pageData.forEach((item, index) => {
-      const row = document.createElement('tr');
-      const globalIndex = startIndex + index;
-      
-      row.innerHTML = `
-        <td>${item.msisdn}</td>
-        <td>${item.firstName}</td>
-        <td>${item.lastName}</td>
-        <td>${item.siteId}</td>
-        ${currentUser.role === 'TSM' ? `
-          <td>${item.lm || ''}</td>
-          <td>${item.mtd || ''}</td>
-          <td>${item.amLm || ''}</td>
-          <td>${item.amaMtd || ''}</td>
-        ` : ''}
-        <td>${item.lines || ''}</td>
-        <td>${item.given || ''}</td>
-        <td>${item.floatServiced || ''}</td>
-        ${currentUser.role === 'TSM' ? `
-          <td>${item.qsso || 'No'}</td>
-          <td>${item.qama || 'No'}</td>
-          <td>${item.kcbAgents || 'No'}</td>
-        ` : ''}
-        <td>${item.newRecruitment || 'No'}</td>
-        ${currentUser.role === 'TSM' ? `
-          <td>${item.visitation || 'No'}</td>
-          <td>${item.visitationDate || ''}</td>
-          <td>${item.visitationTime || ''}</td>
-        ` : ''}
-      `;
-      
-      tableBody.appendChild(row);
-    });
+    
+    if (pageData.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      const colSpan = currentUser.role === 'TSM' ? 18 : 8;
+      td.colSpan = colSpan;
+      td.textContent = 'No retailer data available. Add some entries using the form above.';
+      td.style.textAlign = 'center';
+      td.style.padding = '2rem';
+      td.style.color = '#666';
+      tr.appendChild(td);
+      tableBody.appendChild(tr);
+    } else {
+      pageData.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const globalIndex = startIndex + index;
+        
+        row.innerHTML = `
+          <td>${item.msisdn}</td>
+          <td>${item.firstName}</td>
+          <td>${item.lastName}</td>
+          <td>${item.siteId}</td>
+          ${currentUser.role === 'TSM' ? `
+            <td>${item.lm || ''}</td>
+            <td>${item.mtd || ''}</td>
+            <td>${item.amLm || ''}</td>
+            <td>${item.amaMtd || ''}</td>
+          ` : ''}
+          <td>${item.lines || ''}</td>
+          <td>${item.given || ''}</td>
+          <td>${item.floatServiced || ''}</td>
+          ${currentUser.role === 'TSM' ? `
+            <td>${item.qsso || 'No'}</td>
+            <td>${item.qama || 'No'}</td>
+            <td>${item.kcbAgents || 'No'}</td>
+          ` : ''}
+          <td>${item.newRecruitment || 'No'}</td>
+          ${currentUser.role === 'TSM' ? `
+            <td>${item.visitation || 'No'}</td>
+            <td>${item.visitationDate || ''}</td>
+            <td>${item.visitationTime || ''}</td>
+          ` : ''}
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
     
     // Render pagination
     renderPagination(totalPages, uiState.page, paginationContainer, (page) => {
@@ -494,32 +498,47 @@
     
     // Render table rows
     prospectTableBody.innerHTML = '';
-    pageData.forEach((item, index) => {
-      const row = document.createElement('tr');
-      const globalIndex = startIndex + index;
-      
-      // Check if follow-up date is today or in the past
-      const today = new Date().toISOString().split('T')[0];
-      const followUpDate = item.followUpDate;
-      const statusClass = followUpDate <= today ? 'status-due' : 'status-pending';
-      
-      row.innerHTML = `
-        <td>${item.prospectMsisdn}</td>
-        <td>${item.prospectFirstName}</td>
-        <td>${item.prospectLastName}</td>
-        <td>${item.prospectLocation}</td>
-        <td>${item.prospectBusinessType}</td>
-        <td>${item.prospectInterestLevel}</td>
-        <td>${item.followUpDate}</td>
-        <td><span class="status-badge ${statusClass}">${followUpDate <= today ? 'Due' : 'Pending'}</span></td>
-        <td>
-          <button class="btn-small btn-primary" onclick="markAsRecruited(${globalIndex})">Recruited</button>
-          <button class="btn-small btn-danger" onclick="deleteProspect(${globalIndex})">Delete</button>
-        </td>
-      `;
-      
-      prospectTableBody.appendChild(row);
-    });
+    
+    if (pageData.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 9;
+      td.textContent = 'No prospects available. Add some prospects using the form above.';
+      td.style.textAlign = 'center';
+      td.style.padding = '2rem';
+      td.style.color = '#666';
+      tr.appendChild(td);
+      prospectTableBody.appendChild(tr);
+    } else {
+      pageData.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const globalIndex = startIndex + index;
+        
+        // Check if follow-up date is today or in the past
+        const today = new Date().toISOString().split('T')[0];
+        const followUpDate = item.followUpDate;
+        const isDue = followUpDate <= today;
+        const statusClass = isDue ? 'status-due' : 'status-pending';
+        const statusText = isDue ? 'Due' : 'Pending';
+        
+        row.innerHTML = `
+          <td>${item.prospectMsisdn}</td>
+          <td>${item.prospectFirstName}</td>
+          <td>${item.prospectLastName}</td>
+          <td>${item.prospectLocation}</td>
+          <td>${item.prospectBusinessType}</td>
+          <td>${item.prospectInterestLevel}</td>
+          <td>${item.followUpDate}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td>
+            <button class="btn-small btn-primary" onclick="markAsRecruited(${globalIndex})">Recruited</button>
+            <button class="btn-small btn-danger" onclick="deleteProspect(${globalIndex})">Delete</button>
+          </td>
+        `;
+        
+        prospectTableBody.appendChild(row);
+      });
+    }
     
     // Render pagination
     renderPagination(totalPages, prospectUIState.page, prospectPaginationContainer, (page) => {
@@ -542,7 +561,9 @@
         lastName: recruitedProspect.prospectLastName,
         siteId: recruitedProspect.prospectLocation,
         newRecruitment: 'Yes',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        addedBy: currentUser.phoneNumber,
+        userRole: currentUser.role
       };
       
       data.push(retailerEntry);
@@ -586,7 +607,16 @@
     container.appendChild(prevButton);
     
     // Page buttons
-    for (let i = 1; i <= totalPages; i++) {
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
       const pageButton = document.createElement('button');
       pageButton.textContent = i;
       pageButton.className = i === currentPage ? 'active' : '';
@@ -642,15 +672,15 @@
     }
     
     const headers = currentUser.role === 'TSM' 
-      ? ['MSISDN', 'First Name', 'Last Name', 'Site ID', 'GA LM', 'GA MTD', 'AM LM', 'AMA MTD', 'LINES', 'GIVEN', 'Float Serviced', 'QSSO', 'QAMA', 'KCB Agents', 'New Recruitment', 'Visitation Status', 'Visitation Date', 'Visitation Time']
-      : ['MSISDN', 'First Name', 'Last Name', 'Site ID', 'LINES', 'GIVEN', 'Float Serviced', 'New Recruitment'];
+      ? ['MSISDN', 'First Name', 'Last Name', 'Site ID', 'GA LM', 'GA MTD', 'AM LM', 'AMA MTD', 'LINES', 'GIVEN', 'Float Serviced', 'QSSO', 'QAMA', 'KCB Agents', 'New Recruitment', 'Visitation Status', 'Visitation Date', 'Visitation Time', 'Added By', 'User Role']
+      : ['MSISDN', 'First Name', 'Last Name', 'Site ID', 'LINES', 'GIVEN', 'Float Serviced', 'New Recruitment', 'Added By', 'User Role'];
     
     const csvContent = [
       headers.join(','),
       ...data.map(row => 
         currentUser.role === 'TSM'
-          ? [row.msisdn, row.firstName, row.lastName, row.siteId, row.lm, row.mtd, row.amLm, row.amaMtd, row.lines, row.given, row.floatServiced, row.qsso, row.qama, row.kcbAgents, row.newRecruitment, row.visitation, row.visitationDate, row.visitationTime].join(',')
-          : [row.msisdn, row.firstName, row.lastName, row.siteId, row.lines, row.given, row.floatServiced, row.newRecruitment].join(',')
+          ? [row.msisdn, row.firstName, row.lastName, row.siteId, row.lm, row.mtd, row.amLm, row.amaMtd, row.lines, row.given, row.floatServiced, row.qsso, row.qama, row.kcbAgents, row.newRecruitment, row.visitation, row.visitationDate, row.visitationTime, row.addedBy, row.userRole].join(',')
+          : [row.msisdn, row.firstName, row.lastName, row.siteId, row.lines, row.given, row.floatServiced, row.newRecruitment, row.addedBy, row.userRole].join(',')
       )
     ].join('\n');
     
@@ -674,12 +704,12 @@
       return;
     }
     
-    const headers = ['MSISDN', 'First Name', 'Last Name', 'Location', 'Business Type', 'Interest Level', 'Follow-up Date', 'Status', 'Notes'];
+    const headers = ['MSISDN', 'First Name', 'Last Name', 'Location', 'Business Type', 'Interest Level', 'Follow-up Date', 'Status', 'Notes', 'Added By', 'User Role'];
     
     const csvContent = [
       headers.join(','),
       ...prospects.map(row => 
-        [row.prospectMsisdn, row.prospectFirstName, row.prospectLastName, row.prospectLocation, row.prospectBusinessType, row.prospectInterestLevel, row.followUpDate, row.status, row.followUpNotes].join(',')
+        [row.prospectMsisdn, row.prospectFirstName, row.prospectLastName, row.prospectLocation, row.prospectBusinessType, row.prospectInterestLevel, row.followUpDate, row.status, row.followUpNotes, row.addedBy, row.userRole].join(',')
       )
     ].join('\n');
     
@@ -782,5 +812,5 @@
   }
 
   // Initialize the application
-  init();
+  document.addEventListener('DOMContentLoaded', init);
 })();
