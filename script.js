@@ -1,579 +1,786 @@
-// Authentication and User Management
-const loginSection = document.getElementById('loginSection');
-const appSection = document.getElementById('appSection');
-const loginForm = document.getElementById('loginForm');
-const otpSection = document.getElementById('otpSection');
-const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-const resendOtpBtn = document.getElementById('resendOtpBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const userRoleDisplay = document.getElementById('userRoleDisplay');
-const userPhoneDisplay = document.getElementById('userPhoneDisplay');
 
-// Main App Elements
-const form = document.getElementById('dataForm');
-const tableBody = document.querySelector('#dataTable tbody');
-const downloadBtn = document.getElementById('downloadBtn');
-const clearBtn = document.getElementById('clearBtn');
-const clearAllBtn = document.getElementById('clearAllBtn');
-const entryCount = document.getElementById('entryCount');
+// Consolidated application script with DSR prospect management
+// Features: OTP demo, TSM date/time auto-lock, prospect management, tab system
 
-// Application State
-let data = JSON.parse(localStorage.getItem('retailerData')) || [];
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-let otpData = JSON.parse(localStorage.getItem('otpData')) || {};
+(() => {
+  // DOM references
+  const loginSection = document.getElementById('loginSection');
+  const appSection = document.getElementById('appSection');
+  const loginForm = document.getElementById('loginForm');
+  const otpSection = document.getElementById('otpSection');
+  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+  const resendOtpBtn = document.getElementById('resendOtpBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const userRoleDisplay = document.getElementById('userRoleDisplay');
+  const userPhoneDisplay = document.getElementById('userPhoneDisplay');
 
-// Initialize the application
-function initApp() {
-  if (currentUser && currentUser.isAuthenticated) {
-    showAppSection();
-  } else {
-    showLoginSection();
+  // Tab elements
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const prospectTabButton = document.getElementById('prospectTabButton');
+
+  // Retailer form elements
+  const form = document.getElementById('dataForm');
+  const tableBody = document.querySelector('#dataTable tbody');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const clearAllBtn = document.getElementById('clearAllBtn');
+  const entryCount = document.getElementById('entryCount');
+
+  // Prospect form elements
+  const prospectForm = document.getElementById('prospectForm');
+  const prospectTableBody = document.querySelector('#prospectTable tbody');
+  const downloadProspectsBtn = document.getElementById('downloadProspectsBtn');
+  const clearProspectBtn = document.getElementById('clearProspectBtn');
+  const clearAllProspectsBtn = document.getElementById('clearAllProspectsBtn');
+  const prospectCount = document.getElementById('prospectCount');
+
+  // Table controls
+  const searchInput = document.getElementById('searchInput');
+  const pageSizeSelect = document.getElementById('pageSizeSelect');
+  const paginationContainer = document.getElementById('pagination');
+
+  const prospectSearchInput = document.getElementById('prospectSearchInput');
+  const prospectPageSizeSelect = document.getElementById('prospectPageSizeSelect');
+  const prospectPaginationContainer = document.getElementById('prospectPagination');
+
+  // State
+  let data = JSON.parse(localStorage.getItem('retailerData')) || [];
+  let prospects = JSON.parse(localStorage.getItem('prospectData')) || [];
+  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+  let otpData = JSON.parse(localStorage.getItem('otpData')) || {};
+
+  const uiStateKey = 'tableUIState';
+  let uiState = JSON.parse(localStorage.getItem(uiStateKey)) || {
+    searchText: '', sortBy: null, sortDir: 'asc', page: 1, pageSize: 20
+  };
+
+  const prospectUIStateKey = 'prospectUIState';
+  let prospectUIState = JSON.parse(localStorage.getItem(prospectUIStateKey)) || {
+    searchText: '', sortBy: null, sortDir: 'asc', page: 1, pageSize: 20
+  };
+
+  function saveUIState() { localStorage.setItem(uiStateKey, JSON.stringify(uiState)); }
+  function saveProspectUIState() { localStorage.setItem(prospectUIStateKey, JSON.stringify(prospectUIState)); }
+
+  // Tab system
+  function initTabs() {
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.getAttribute('data-tab');
+        
+        // Update active tab button
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Show active tab content
+        tabContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === tabId) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
   }
-  updateEntryCount();
-}
 
-// Show/Hide Sections
-function showLoginSection() {
-  loginSection.style.display = 'flex';
-  appSection.style.display = 'none';
-}
+  // Initialize the app
+  function init() {
+    // Check if user is already logged in
+    if (currentUser) {
+      showApp();
+    } else {
+      showLogin();
+    }
 
-function showAppSection() {
-  loginSection.style.display = 'none';
-  appSection.style.display = 'block';
-  updateUserInterface();
-  renderTable();
-}
+    initTabs();
+    setupEventListeners();
+    updateEntryCount();
+    updateProspectCount();
+    renderTable();
+    renderProspectTable();
+    setupInstallPrompt();
+    setupOnboarding();
+  }
 
-// Update UI based on user role
-function updateUserInterface() {
-  if (!currentUser) return;
-  
-  userRoleDisplay.textContent = `Role: ${currentUser.role}`;
-  userPhoneDisplay.textContent = `Phone: ${currentUser.phoneNumber}`;
-  
-  // Show/hide TSM-only elements
-  const isTSM = currentUser.role === 'TSM';
-  document.body.classList.toggle('user-tsm', isTSM);
-  
-  // Set default date and time for TSM users
-  if (isTSM) {
+  // Setup event listeners
+  function setupEventListeners() {
+    // Login form submission
+    loginForm.addEventListener('submit', handleLoginSubmit);
+
+    // OTP verification
+    verifyOtpBtn.addEventListener('click', verifyOtp);
+    resendOtpBtn.addEventListener('click', resendOtp);
+
+    // Logout
+    logoutBtn.addEventListener('click', handleLogout);
+
+    // Retailer form submission
+    form.addEventListener('submit', handleFormSubmit);
+
+    // Prospect form submission
+    prospectForm.addEventListener('submit', handleProspectSubmit);
+
+    // Clear buttons
+    clearBtn.addEventListener('click', clearForm);
+    clearProspectBtn.addEventListener('click', clearProspectForm);
+
+    // Clear all data buttons
+    clearAllBtn.addEventListener('click', clearAllData);
+    clearAllProspectsBtn.addEventListener('click', clearAllProspects);
+
+    // Download buttons
+    downloadBtn.addEventListener('click', downloadCSV);
+    downloadProspectsBtn.addEventListener('click', downloadProspectsCSV);
+
+    // Table controls
+    searchInput.addEventListener('input', handleSearch);
+    pageSizeSelect.addEventListener('change', handlePageSizeChange);
+    prospectSearchInput.addEventListener('input', handleProspectSearch);
+    prospectPageSizeSelect.addEventListener('change', handleProspectPageSizeChange);
+
+    // TSM-only fields visibility
+    document.getElementById('userRole').addEventListener('change', toggleTSMFields);
+    
+    // Auto-set date and time for TSM
     document.getElementById('visitationDate').valueAsDate = new Date();
     const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('visitationTime').value = `${hours}:${minutes}`;
-  }
-}
+    document.getElementById('visitationTime').value = 
+      `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-// OTP Management
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-function sendOTP(phoneNumber) {
-  const otp = generateOTP();
-  const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
-  
-  otpData[phoneNumber] = {
-    otp: otp,
-    expiry: expiry,
-    attempts: 0
-  };
-  
-  localStorage.setItem('otpData', JSON.stringify(otpData));
-  
-  // In a real application, you would send this OTP via SMS
-  // For demo purposes, we'll show it in an alert
-  showNotification(`OTP sent to ${phoneNumber}. Demo OTP: ${otp}`, 'info');
-  
-  return true;
-}
-
-function verifyOTP(phoneNumber, enteredOtp) {
-  const storedOtpData = otpData[phoneNumber];
-  
-  if (!storedOtpData) {
-    showNotification('OTP not found. Please request a new OTP.', 'error');
-    return false;
-  }
-  
-  if (Date.now() > storedOtpData.expiry) {
-    showNotification('OTP has expired. Please request a new OTP.', 'error');
-    return false;
-  }
-  
-  if (storedOtpData.attempts >= 3) {
-    showNotification('Too many failed attempts. Please request a new OTP.', 'error');
-    return false;
-  }
-  
-  if (storedOtpData.otp === enteredOtp) {
-    // OTP verified successfully
-    delete otpData[phoneNumber];
-    localStorage.setItem('otpData', JSON.stringify(otpData));
-    return true;
-  } else {
-    // Increment failed attempts
-    storedOtpData.attempts++;
-    localStorage.setItem('otpData', JSON.stringify(otpData));
-    showNotification(`Invalid OTP. ${3 - storedOtpData.attempts} attempts remaining.`, 'error');
-    return false;
-  }
-}
-
-// Login Form Handler
-loginForm.addEventListener('submit', function(e) {
-  e.preventDefault();
-  
-  const phoneNumber = document.getElementById('phoneNumber').value;
-  const userRole = document.getElementById('userRole').value;
-  
-  // Validate Airtel number (Kenya format)
-  if (!phoneNumber.startsWith('254')) {
-    showNotification('Please enter a valid Airtel Kenya number starting with 254', 'error');
-    return;
-  }
-  
-  if (phoneNumber.length !== 12) {
-    showNotification('Phone number must be 12 digits (254XXXXXXXXX)', 'error');
-    return;
-  }
-  
-  if (!userRole) {
-    showNotification('Please select a user role', 'error');
-    return;
-  }
-  
-  // Send OTP
-  if (sendOTP(phoneNumber)) {
-    otpSection.style.display = 'block';
-    document.getElementById('otp').focus();
-  }
-});
-
-// Verify OTP Handler
-verifyOtpBtn.addEventListener('click', function() {
-  const phoneNumber = document.getElementById('phoneNumber').value;
-  const userRole = document.getElementById('userRole').value;
-  const enteredOtp = document.getElementById('otp').value;
-  
-  if (enteredOtp.length !== 6) {
-    showNotification('Please enter a valid 6-digit OTP', 'error');
-    return;
-  }
-  
-  if (verifyOTP(phoneNumber, enteredOtp)) {
-    // Login successful
-    currentUser = {
-      phoneNumber: phoneNumber,
-      role: userRole,
-      isAuthenticated: true,
-      loginTime: new Date().toISOString()
-    };
-    
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    showAppSection();
-    showNotification(`Welcome ${userRole}! Login successful.`, 'success');
-  }
-});
-
-// Resend OTP Handler
-resendOtpBtn.addEventListener('click', function() {
-  const phoneNumber = document.getElementById('phoneNumber').value;
-  sendOTP(phoneNumber);
-});
-
-// Logout Handler
-logoutBtn.addEventListener('click', function() {
-  currentUser = null;
-  localStorage.removeItem('currentUser');
-  showLoginSection();
-  showNotification('Logged out successfully', 'info');
-});
-
-// Data Management Functions
-function updateEntryCount() {
-  entryCount.textContent = data.length;
-  if (data.length >= 2000) {
-    entryCount.style.color = 'var(--danger-color)';
-    entryCount.style.fontWeight = 'bold';
-  } else if (data.length >= 1500) {
-    entryCount.style.color = 'var(--warning-color)';
-  } else {
-    entryCount.style.color = 'var(--success-color)';
-  }
-}
-
-function renderTable() {
-  tableBody.innerHTML = '';
-  
-  if (data.length === 0) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    const colSpan = currentUser?.role === 'TSM' ? 18 : 8;
-    td.colSpan = colSpan;
-    td.textContent = 'No retailer data available. Add some entries using the form above.';
-    td.style.textAlign = 'center';
-    td.style.padding = '2rem';
-    td.style.color = '#666';
-    tr.appendChild(td);
-    tableBody.appendChild(tr);
-    return;
+    // Lock date/time fields for TSM
+    document.getElementById('visitationDate').readOnly = true;
+    document.getElementById('visitationTime').readOnly = true;
   }
 
-  data.forEach((row, index) => {
-    const tr = document.createElement('tr');
-    
-    // Define fields based on user role
-    let fields = [];
-    if (currentUser?.role === 'TSM') {
-      fields = [
-        'msisdn', 'firstName', 'lastName', 'siteId', 
-        'lm', 'mtd', 'amLm', 'amaMtd', 'lines', 'given', 'floatServiced',
-        'qsso', 'qama', 'kcbAgents', 'newRecruitment', 'visitation',
-        'visitationDate', 'visitationTime'
-      ];
+  // Login handler
+  function handleLoginSubmit(e) {
+    e.preventDefault();
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const userRole = document.getElementById('userRole').value;
+
+    // Demo OTP for DSR number 784478620
+    if (phoneNumber === '784478620' && userRole === 'DSR') {
+      // Pre-approved DSR login
+      const demoOtp = '123456';
+      otpData = { phoneNumber, otp: demoOtp, timestamp: Date.now() };
+      localStorage.setItem('otpData', JSON.stringify(otpData));
+      
+      document.getElementById('otp').value = demoOtp;
+      otpSection.style.display = 'block';
+      showNotification(`OTP sent to ${phoneNumber}. Use ${demoOtp} to login.`, 'success');
     } else {
-      // DSR sees limited fields
-      fields = [
-        'msisdn', 'firstName', 'lastName', 'siteId', 
-        'lines', 'given', 'floatServiced', 'newRecruitment'
-      ];
+      // Generate random OTP for other numbers
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      otpData = { phoneNumber, otp, timestamp: Date.now() };
+      localStorage.setItem('otpData', JSON.stringify(otpData));
+      
+      otpSection.style.display = 'block';
+      showNotification(`OTP sent to ${phoneNumber}`, 'success');
     }
-    
-    fields.forEach(field => {
-      const td = document.createElement('td');
-      let value = row[field] || '-';
-      
-      // Format specific fields
-      if (field === 'lines' && value !== '-') {
-        value = parseInt(value).toLocaleString();
-      }
-      
-      // Style boolean fields
-      if (['qsso', 'qama', 'kcbAgents', 'newRecruitment', 'visitation'].includes(field)) {
-        td.style.fontWeight = value === 'Yes' ? 'bold' : 'normal';
-        td.style.color = value === 'Yes' ? 'var(--success-color)' : '#666';
-      }
-      
-      // Format date and time
-      if (field === 'visitationDate' && value !== '-') {
-        const date = new Date(value);
-        value = date.toLocaleDateString('en-GB');
-      }
-      
-      td.textContent = value;
-      tr.appendChild(td);
-    });
-    
-    tableBody.appendChild(tr);
-  });
-}
+  }
 
-function showNotification(message, type = 'info') {
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.textContent = message;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease-in';
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 300);
-  }, 3000);
-}
+  // OTP verification
+  function verifyOtp() {
+    const enteredOtp = document.getElementById('otp').value;
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const userRole = document.getElementById('userRole').value;
 
-// Form submission handler
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  
-  if (!currentUser || !currentUser.isAuthenticated) {
-    showNotification('Please login to submit data', 'error');
-    return;
-  }
-  
-  const formData = new FormData(form);
-  const newEntry = Object.fromEntries(formData.entries());
-  
-  // Validate data limit
-  if (data.length >= 2000) {
-    showNotification('Data limit reached (2000 entries). Please export and clear data.', 'error');
-    return;
-  }
-  
-  // Validate required fields based on user role
-  let requiredFields = ['msisdn', 'firstName', 'lastName', 'siteId'];
-  
-  if (currentUser.role === 'TSM') {
-    requiredFields.push('visitationDate', 'visitationTime');
-  }
-  
-  const missingFields = requiredFields.filter(field => !( (newEntry[field] || '').trim() ));
-  
-  if (missingFields.length > 0) {
-    showNotification(`Please fill in all required fields: ${missingFields.join(', ')}`, 'error');
-    return;
-  }
-  
-  // Validate MSISDN format
-  const msisdnRegex = /^[0-9+\-\s()]+$/;
-  if (!msisdnRegex.test(newEntry.msisdn)) {
-    showNotification('Please enter a valid MSISDN number', 'error');
-    return;
-  }
-  
-  // For TSM users, validate date is not in the future
-  if (currentUser.role === 'TSM') {
-    const visitationDate = new Date(newEntry.visitationDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (visitationDate > today) {
-      showNotification('Visitation date cannot be in the future', 'error');
+    if (!otpData.otp) {
+      showNotification('Please request an OTP first', 'error');
       return;
     }
-  }
-  
-  // Add user info and timestamp
-  newEntry.addedBy = currentUser.phoneNumber;
-  newEntry.userRole = currentUser.role;
-  newEntry.timestamp = new Date().toISOString();
-  
-  data.push(newEntry);
-  localStorage.setItem('retailerData', JSON.stringify(data));
-  renderTable();
-  updateEntryCount();
-  form.reset();
-  
-  // Reset TSM-specific fields if user is TSM
-  if (currentUser.role === 'TSM') {
-    document.getElementById('visitationDate').valueAsDate = new Date();
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('visitationTime').value = `${hours}:${minutes}`;
-  }
-  
-  showNotification('Retailer data added successfully!', 'success');
-});
 
-// Clear form handler
-clearBtn.addEventListener('click', () => {
-  form.reset();
-  
-  // Reset TSM-specific fields if user is TSM
-  if (currentUser?.role === 'TSM') {
-    document.getElementById('visitationDate').valueAsDate = new Date();
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('visitationTime').value = `${hours}:${minutes}`;
-  }
-  
-  showNotification('Form cleared.', 'info');
-});
+    // Check if OTP is expired (10 minutes)
+    if (Date.now() - otpData.timestamp > 10 * 60 * 1000) {
+      showNotification('OTP has expired. Please request a new one.', 'error');
+      return;
+    }
 
-// Clear all data handler
-clearAllBtn.addEventListener('click', () => {
-  if (data.length === 0) {
-    showNotification('No data to clear.', 'info');
-    return;
-  }
-  
-  if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-    data = [];
-    localStorage.setItem('retailerData', JSON.stringify(data));
-    renderTable();
-    updateEntryCount();
-    showNotification('All data cleared successfully.', 'success');
-  }
-});
-
-// Download CSV handler
-downloadBtn.addEventListener('click', () => {
-  if (data.length === 0) {
-    showNotification('No data to export.', 'info');
-    return;
-  }
-  
-  try {
-    // Define CSV headers based on user role
-    let headers = [];
-    if (currentUser?.role === 'TSM') {
-      headers = [
-        'MSISDN', 'First Name', 'Last Name', 'Site ID', 
-        'GA LM', 'GA MTD', 'AM LM', 'AMA MTD', 'LINES', 'GIVEN', 'Float Serviced',
-        'QSSO', 'QAMA', 'KCB Agents', 'New Recruitment', 'Visitation Status',
-        'Visitation Date', 'Visitation Time', 'Added By', 'User Role'
-      ];
+    if (enteredOtp === otpData.otp && phoneNumber === otpData.phoneNumber) {
+      currentUser = { phoneNumber, role: userRole };
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      showApp();
+      showNotification('Login successful!', 'success');
     } else {
-      headers = [
-        'MSISDN', 'First Name', 'Last Name', 'Site ID', 
-        'LINES', 'GIVEN', 'Float Serviced', 'New Recruitment', 'Added By'
-      ];
+      showNotification('Invalid OTP', 'error');
+    }
+  }
+
+  // Resend OTP
+  function resendOtp() {
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    const userRole = document.getElementById('userRole').value;
+    
+    if (phoneNumber === '784478620' && userRole === 'DSR') {
+      const demoOtp = '123456';
+      otpData = { phoneNumber, otp: demoOtp, timestamp: Date.now() };
+      localStorage.setItem('otpData', JSON.stringify(otpData));
+      showNotification(`OTP resent to ${phoneNumber}. Use ${demoOtp} to login.`, 'success');
+    } else {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      otpData = { phoneNumber, otp, timestamp: Date.now() };
+      localStorage.setItem('otpData', JSON.stringify(otpData));
+      showNotification(`OTP resent to ${phoneNumber}`, 'success');
+    }
+  }
+
+  // Show app section
+  function showApp() {
+    loginSection.style.display = 'none';
+    appSection.style.display = 'block';
+    userRoleDisplay.textContent = currentUser.role;
+    userPhoneDisplay.textContent = currentUser.phoneNumber;
+    
+    // Toggle TSM-only fields based on role
+    toggleTSMFields();
+    
+    // Update counts
+    updateEntryCount();
+    updateProspectCount();
+    
+    // Render tables
+    renderTable();
+    renderProspectTable();
+  }
+
+  // Show login section
+  function showLogin() {
+    loginSection.style.display = 'flex';
+    appSection.style.display = 'none';
+    otpSection.style.display = 'none';
+    loginForm.reset();
+  }
+
+  // Logout handler
+  function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    showLogin();
+    showNotification('Logged out successfully', 'success');
+  }
+
+  // Toggle TSM-only fields
+  function toggleTSMFields() {
+    const userRole = currentUser ? currentUser.role : document.getElementById('userRole').value;
+    const tsmFields = document.querySelectorAll('.tsm-only');
+    
+    tsmFields.forEach(field => {
+      if (userRole === 'TSM') {
+        field.style.display = 'block';
+      } else {
+        field.style.display = 'none';
+      }
+    });
+  }
+
+  // Retailer form submission
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    const entry = Object.fromEntries(formData.entries());
+    
+    // Add timestamp
+    entry.timestamp = new Date().toISOString();
+    
+    // Add to data array
+    data.push(entry);
+    
+    // Save to localStorage
+    localStorage.setItem('retailerData', JSON.stringify(data));
+    
+    // Update UI
+    updateEntryCount();
+    renderTable();
+    clearForm();
+    
+    showNotification('Retailer added successfully!', 'success');
+  }
+
+  // Prospect form submission
+  function handleProspectSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(prospectForm);
+    const entry = Object.fromEntries(formData.entries());
+    
+    // Add timestamp and initial status
+    entry.timestamp = new Date().toISOString();
+    entry.status = 'Pending';
+    
+    // Add to prospects array
+    prospects.push(entry);
+    
+    // Save to localStorage
+    localStorage.setItem('prospectData', JSON.stringify(prospects));
+    
+    // Update UI
+    updateProspectCount();
+    renderProspectTable();
+    clearProspectForm();
+    
+    showNotification('Prospect added successfully!', 'success');
+  }
+
+  // Clear retailer form
+  function clearForm() {
+    form.reset();
+    // Reset date and time to current
+    document.getElementById('visitationDate').valueAsDate = new Date();
+    const now = new Date();
+    document.getElementById('visitationTime').value = 
+      `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+
+  // Clear prospect form
+  function clearProspectForm() {
+    prospectForm.reset();
+    // Set follow-up date to today by default
+    document.getElementById('followUpDate').valueAsDate = new Date();
+  }
+
+  // Clear all retailer data
+  function clearAllData() {
+    if (confirm('Are you sure you want to clear all retailer data? This action cannot be undone.')) {
+      data = [];
+      localStorage.removeItem('retailerData');
+      updateEntryCount();
+      renderTable();
+      showNotification('All retailer data cleared', 'success');
+    }
+  }
+
+  // Clear all prospect data
+  function clearAllProspects() {
+    if (confirm('Are you sure you want to clear all prospect data? This action cannot be undone.')) {
+      prospects = [];
+      localStorage.removeItem('prospectData');
+      updateProspectCount();
+      renderProspectTable();
+      showNotification('All prospect data cleared', 'success');
+    }
+  }
+
+  // Update retailer entry count
+  function updateEntryCount() {
+    entryCount.textContent = data.length;
+  }
+
+  // Update prospect count
+  function updateProspectCount() {
+    prospectCount.textContent = prospects.length;
+  }
+
+  // Render retailer table with pagination and search
+  function renderTable() {
+    let filteredData = [...data];
+    
+    // Apply search filter
+    if (uiState.searchText) {
+      const searchLower = uiState.searchText.toLowerCase();
+      filteredData = filteredData.filter(item => 
+        item.msisdn.toLowerCase().includes(searchLower) ||
+        item.firstName.toLowerCase().includes(searchLower) ||
+        item.lastName.toLowerCase().includes(searchLower) ||
+        item.siteId.toLowerCase().includes(searchLower)
+      );
     }
     
-    let csv = headers.join(',') + '\n';
+    // Apply sorting
+    if (uiState.sortBy) {
+      filteredData.sort((a, b) => {
+        let aVal = a[uiState.sortBy];
+        let bVal = b[uiState.sortBy];
+        
+        // Handle numeric sorting for numbers
+        if (uiState.sortBy === 'lines') {
+          aVal = parseInt(aVal) || 0;
+          bVal = parseInt(bVal) || 0;
+        }
+        
+        if (aVal < bVal) return uiState.sortDir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return uiState.sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
     
-    // Add data rows
-    data.forEach(row => {
-      let rowData = [];
+    // Pagination
+    const totalPages = Math.ceil(filteredData.length / uiState.pageSize);
+    if (uiState.page > totalPages) uiState.page = 1;
+    
+    const startIndex = (uiState.page - 1) * uiState.pageSize;
+    const endIndex = startIndex + uiState.pageSize;
+    const pageData = filteredData.slice(startIndex, endIndex);
+    
+    // Render table rows
+    tableBody.innerHTML = '';
+    pageData.forEach((item, index) => {
+      const row = document.createElement('tr');
+      const globalIndex = startIndex + index;
       
-      if (currentUser?.role === 'TSM') {
-        rowData = [
-          row.msisdn || '',
-          row.firstName || '',
-          row.lastName || '',
-          row.siteId || '',
-          row.lm || '',
-          row.mtd || '',
-          row.amLm || '',
-          row.amaMtd || '',
-          row.lines || '',
-          row.given || '',
-          row.floatServiced || '',
-          row.qsso || 'No',
-          row.qama || 'No',
-          row.kcbAgents || 'No',
-          row.newRecruitment || 'No',
-          row.visitation || 'No',
-          row.visitationDate || '',
-          row.visitationTime || '',
-          row.addedBy || '',
-          row.userRole || ''
-        ];
-      } else {
-        rowData = [
-          row.msisdn || '',
-          row.firstName || '',
-          row.lastName || '',
-          row.siteId || '',
-          row.lines || '',
-          row.given || '',
-          row.floatServiced || '',
-          row.newRecruitment || 'No',
-          row.addedBy || ''
-        ];
-      }
+      row.innerHTML = `
+        <td>${item.msisdn}</td>
+        <td>${item.firstName}</td>
+        <td>${item.lastName}</td>
+        <td>${item.siteId}</td>
+        ${currentUser.role === 'TSM' ? `
+          <td>${item.lm || ''}</td>
+          <td>${item.mtd || ''}</td>
+          <td>${item.amLm || ''}</td>
+          <td>${item.amaMtd || ''}</td>
+        ` : ''}
+        <td>${item.lines || ''}</td>
+        <td>${item.given || ''}</td>
+        <td>${item.floatServiced || ''}</td>
+        ${currentUser.role === 'TSM' ? `
+          <td>${item.qsso || 'No'}</td>
+          <td>${item.qama || 'No'}</td>
+          <td>${item.kcbAgents || 'No'}</td>
+        ` : ''}
+        <td>${item.newRecruitment || 'No'}</td>
+        ${currentUser.role === 'TSM' ? `
+          <td>${item.visitation || 'No'}</td>
+          <td>${item.visitationDate || ''}</td>
+          <td>${item.visitationTime || ''}</td>
+        ` : ''}
+      `;
       
-      csv += rowData.map(value => `"${String(value).replace(/"/g, '""') }"`).join(',') + '\n';
+      tableBody.appendChild(row);
     });
     
-    // Create and trigger download
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    // Render pagination
+    renderPagination(totalPages, uiState.page, paginationContainer, (page) => {
+      uiState.page = page;
+      saveUIState();
+      renderTable();
+    });
+  }
+
+  // Render prospect table with pagination and search
+  function renderProspectTable() {
+    let filteredProspects = [...prospects];
+    
+    // Apply search filter
+    if (prospectUIState.searchText) {
+      const searchLower = prospectUIState.searchText.toLowerCase();
+      filteredProspects = filteredProspects.filter(item => 
+        item.prospectMsisdn.toLowerCase().includes(searchLower) ||
+        item.prospectFirstName.toLowerCase().includes(searchLower) ||
+        item.prospectLastName.toLowerCase().includes(searchLower) ||
+        item.prospectLocation.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Apply sorting
+    if (prospectUIState.sortBy) {
+      filteredProspects.sort((a, b) => {
+        let aVal = a[prospectUIState.sortBy];
+        let bVal = b[prospectUIState.sortBy];
+        
+        if (aVal < bVal) return prospectUIState.sortDir === 'asc' ? -1 : 1;
+        if (aVal > bVal) return prospectUIState.sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    
+    // Pagination
+    const totalPages = Math.ceil(filteredProspects.length / prospectUIState.pageSize);
+    if (prospectUIState.page > totalPages) prospectUIState.page = 1;
+    
+    const startIndex = (prospectUIState.page - 1) * prospectUIState.pageSize;
+    const endIndex = startIndex + prospectUIState.pageSize;
+    const pageData = filteredProspects.slice(startIndex, endIndex);
+    
+    // Render table rows
+    prospectTableBody.innerHTML = '';
+    pageData.forEach((item, index) => {
+      const row = document.createElement('tr');
+      const globalIndex = startIndex + index;
+      
+      // Check if follow-up date is today or in the past
+      const today = new Date().toISOString().split('T')[0];
+      const followUpDate = item.followUpDate;
+      const statusClass = followUpDate <= today ? 'status-due' : 'status-pending';
+      
+      row.innerHTML = `
+        <td>${item.prospectMsisdn}</td>
+        <td>${item.prospectFirstName}</td>
+        <td>${item.prospectLastName}</td>
+        <td>${item.prospectLocation}</td>
+        <td>${item.prospectBusinessType}</td>
+        <td>${item.prospectInterestLevel}</td>
+        <td>${item.followUpDate}</td>
+        <td><span class="status-badge ${statusClass}">${followUpDate <= today ? 'Due' : 'Pending'}</span></td>
+        <td>
+          <button class="btn-small btn-primary" onclick="markAsRecruited(${globalIndex})">Recruited</button>
+          <button class="btn-small btn-danger" onclick="deleteProspect(${globalIndex})">Delete</button>
+        </td>
+      `;
+      
+      prospectTableBody.appendChild(row);
+    });
+    
+    // Render pagination
+    renderPagination(totalPages, prospectUIState.page, prospectPaginationContainer, (page) => {
+      prospectUIState.page = page;
+      saveProspectUIState();
+      renderProspectTable();
+    });
+  }
+
+  // Mark prospect as recruited
+  window.markAsRecruited = function(index) {
+    if (confirm('Mark this prospect as recruited?')) {
+      // Remove from prospects and add to retailer data
+      const recruitedProspect = prospects.splice(index, 1)[0];
+      
+      // Create retailer entry from prospect
+      const retailerEntry = {
+        msisdn: recruitedProspect.prospectMsisdn,
+        firstName: recruitedProspect.prospectFirstName,
+        lastName: recruitedProspect.prospectLastName,
+        siteId: recruitedProspect.prospectLocation,
+        newRecruitment: 'Yes',
+        timestamp: new Date().toISOString()
+      };
+      
+      data.push(retailerEntry);
+      
+      // Save both datasets
+      localStorage.setItem('retailerData', JSON.stringify(data));
+      localStorage.setItem('prospectData', JSON.stringify(prospects));
+      
+      // Update UI
+      updateEntryCount();
+      updateProspectCount();
+      renderTable();
+      renderProspectTable();
+      
+      showNotification('Prospect marked as recruited!', 'success');
+    }
+  };
+
+  // Delete prospect
+  window.deleteProspect = function(index) {
+    if (confirm('Delete this prospect?')) {
+      prospects.splice(index, 1);
+      localStorage.setItem('prospectData', JSON.stringify(prospects));
+      updateProspectCount();
+      renderProspectTable();
+      showNotification('Prospect deleted', 'success');
+    }
+  };
+
+  // Render pagination controls
+  function renderPagination(totalPages, currentPage, container, onPageChange) {
+    container.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    // Previous button
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '‹';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => onPageChange(currentPage - 1));
+    container.appendChild(prevButton);
+    
+    // Page buttons
+    for (let i = 1; i <= totalPages; i++) {
+      const pageButton = document.createElement('button');
+      pageButton.textContent = i;
+      pageButton.className = i === currentPage ? 'active' : '';
+      pageButton.addEventListener('click', () => onPageChange(i));
+      container.appendChild(pageButton);
+    }
+    
+    // Next button
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '›';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => onPageChange(currentPage + 1));
+    container.appendChild(nextButton);
+  }
+
+  // Search handler for retailer table
+  function handleSearch(e) {
+    uiState.searchText = e.target.value;
+    uiState.page = 1;
+    saveUIState();
+    renderTable();
+  }
+
+  // Page size handler for retailer table
+  function handlePageSizeChange(e) {
+    uiState.pageSize = parseInt(e.target.value);
+    uiState.page = 1;
+    saveUIState();
+    renderTable();
+  }
+
+  // Search handler for prospect table
+  function handleProspectSearch(e) {
+    prospectUIState.searchText = e.target.value;
+    prospectUIState.page = 1;
+    saveProspectUIState();
+    renderProspectTable();
+  }
+
+  // Page size handler for prospect table
+  function handleProspectPageSizeChange(e) {
+    prospectUIState.pageSize = parseInt(e.target.value);
+    prospectUIState.page = 1;
+    saveProspectUIState();
+    renderProspectTable();
+  }
+
+  // Download retailer data as CSV
+  function downloadCSV() {
+    if (data.length === 0) {
+      showNotification('No data to export', 'error');
+      return;
+    }
+    
+    const headers = currentUser.role === 'TSM' 
+      ? ['MSISDN', 'First Name', 'Last Name', 'Site ID', 'GA LM', 'GA MTD', 'AM LM', 'AMA MTD', 'LINES', 'GIVEN', 'Float Serviced', 'QSSO', 'QAMA', 'KCB Agents', 'New Recruitment', 'Visitation Status', 'Visitation Date', 'Visitation Time']
+      : ['MSISDN', 'First Name', 'Last Name', 'Site ID', 'LINES', 'GIVEN', 'Float Serviced', 'New Recruitment'];
+    
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => 
+        currentUser.role === 'TSM'
+          ? [row.msisdn, row.firstName, row.lastName, row.siteId, row.lm, row.mtd, row.amLm, row.amaMtd, row.lines, row.given, row.floatServiced, row.qsso, row.qama, row.kcbAgents, row.newRecruitment, row.visitation, row.visitationDate, row.visitationTime].join(',')
+          : [row.msisdn, row.firstName, row.lastName, row.siteId, row.lines, row.given, row.floatServiced, row.newRecruitment].join(',')
+      )
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const timestamp = new Date().toISOString().split('T')[0];
-    
     a.href = url;
-    a.download = `retailer_data_${timestamp}.csv`;
+    a.download = `retailer-data-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    showNotification(`CSV exported successfully! ${data.length} records downloaded.`, 'success');
-  } catch (error) {
-    showNotification('Error exporting CSV: ' + error.message, 'error');
-    console.error('CSV Export Error:', error);
+    showNotification('CSV exported successfully', 'success');
   }
-});
 
-// Site location statistics
-function getSiteStatistics() {
-  const siteCounts = {};
-  data.forEach(entry => {
-    const site = entry.siteId;
-    siteCounts[site] = (siteCounts[site] || 0) + 1;
-  });
-  return siteCounts;
-}
-
-// Initialize the application when DOM is loaded
-document.addEventListener('DOMContentLoaded', initApp);
-
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(function(registration) {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      })
-      .catch(function(error) {
-        console.log('ServiceWorker registration failed: ', error);
-      });
-  });
-}
-
-// Onboarding modal and Install button handling
-let deferredPrompt = null;
-const installBtn = document.getElementById('installBtn');
-const onboardingModal = document.getElementById('onboardingModal');
-const dismissOnboarding = document.getElementById('dismissOnboarding');
-const learnMoreBtn = document.getElementById('learnMore');
-
-// Show onboarding once per user
-function showOnboardingIfNeeded() {
-  try {
-    const seen = localStorage.getItem('onboardingSeen');
-    if (!seen) {
-      onboardingModal.setAttribute('aria-hidden', 'false');
+  // Download prospect data as CSV
+  function downloadProspectsCSV() {
+    if (prospects.length === 0) {
+      showNotification('No prospects to export', 'error');
+      return;
     }
-  } catch (e) {
-    console.warn('Onboarding check failed', e);
+    
+    const headers = ['MSISDN', 'First Name', 'Last Name', 'Location', 'Business Type', 'Interest Level', 'Follow-up Date', 'Status', 'Notes'];
+    
+    const csvContent = [
+      headers.join(','),
+      ...prospects.map(row => 
+        [row.prospectMsisdn, row.prospectFirstName, row.prospectLastName, row.prospectLocation, row.prospectBusinessType, row.prospectInterestLevel, row.followUpDate, row.status, row.followUpNotes].join(',')
+      )
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prospect-data-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Prospects CSV exported successfully', 'success');
   }
-}
 
-// Hook onboarding dismissal
-if (dismissOnboarding) {
-  dismissOnboarding.addEventListener('click', () => {
-    onboardingModal.setAttribute('aria-hidden', 'true');
-    localStorage.setItem('onboardingSeen', '1');
-  });
-}
+  // Show notification
+  function showNotification(message, type) {
+    // Remove existing notification
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+      existingNotification.remove();
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 3000);
+  }
 
-// If user wants to learn/install from modal
-if (learnMoreBtn) {
-  learnMoreBtn.addEventListener('click', async () => {
-    onboardingModal.setAttribute('aria-hidden', 'true');
-    localStorage.setItem('onboardingSeen', '1');
+  // PWA Installation
+  let deferredPrompt;
+
+  function setupInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('installBtn');
+      if (installBtn) {
+        installBtn.style.display = 'block';
+        installBtn.addEventListener('click', installApp);
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      const installBtn = document.getElementById('installBtn');
+      if (installBtn) installBtn.style.display = 'none';
+      deferredPrompt = null;
+      showNotification('App installed successfully!', 'success');
+    });
+  }
+
+  function installApp() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === 'accepted') {
-        showNotification('App installed successfully', 'success');
-      }
-      deferredPrompt = null;
-      if (installBtn) installBtn.style.display = 'none';
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+      });
     }
-  });
-}
+  }
 
-// beforeinstallprompt - show install CTA when fired
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  if (installBtn) installBtn.style.display = 'inline-block';
-});
+  // Onboarding modal
+  function setupOnboarding() {
+    const onboardingShown = localStorage.getItem('onboardingShown');
+    const modal = document.getElementById('onboardingModal');
+    const dismissBtn = document.getElementById('dismissOnboarding');
+    const learnMoreBtn = document.getElementById('learnMore');
 
-// Install button click handler
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    if (choice.outcome === 'accepted') {
-      showNotification('Thanks — app installed', 'success');
+    if (!onboardingShown && modal) {
+      modal.style.display = 'flex';
     }
-    deferredPrompt = null;
-    installBtn.style.display = 'none';
-  });
-}
 
-// Show onboarding after app init
-document.addEventListener('DOMContentLoaded', showOnboardingIfNeeded);
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        localStorage.setItem('onboardingShown', 'true');
+      });
+    }
+
+    if (learnMoreBtn) {
+      learnMoreBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        localStorage.setItem('onboardingShown', 'true');
+        installApp();
+      });
+    }
+  }
+
+  // Initialize the application
+  init();
+})();

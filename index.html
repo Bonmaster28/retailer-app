@@ -1,3 +1,5 @@
+[file name]: index.html
+[file content begin]
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,9 +54,15 @@
       
       <div class="login-footer">
         <p>Use your Airtel number to login. OTP will be sent for verification.</p>
+        <p><strong>DSR Demo:</strong> Use 784478620</p>
       </div>
     </div>
   </div>
+
+  <!-- Compact app icon shown after logout -->
+  <button id="appIconBtn" class="app-icon-btn" aria-label="Open RetailerPro" title="Open RetailerPro" style="display:none;">
+    <img src="icons/192.png" alt="RetailerPro" width="48" height="48" />
+  </button>
 
   <!-- Main App Section -->
   <div id="appSection" class="app-container" style="display: none;">
@@ -72,259 +80,403 @@
       </div>
     </header>
     
-    <div class="form-container">
-      <h2>Retailer Information</h2>
-      <form id="dataForm">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="msisdn">MSISDN *</label>
-            <input type="text" id="msisdn" name="msisdn" required placeholder="Enter MSISDN" />
-          </div>
-          
-          <div class="form-group">
-            <label for="firstName">First Name *</label>
-            <input type="text" id="firstName" name="firstName" required placeholder="First Name" />
-          </div>
-          
-          <div class="form-group">
-            <label for="lastName">Last Name *</label>
-            <input type="text" id="lastName" name="lastName" required placeholder="Last Name" />
-          </div>
-          
-          <div class="form-group">
-            <label for="siteId">Site ID *</label>
-            <select id="siteId" name="siteId" required>
-              <option value="">Select Site Location</option>
-              <option value="NAIROBI_KAYOLE_JUAKALI">NAIROBI_KAYOLE_JUAKALI</option>
-              <option value="NAIROBI_USIU">NAIROBI_USIU</option>
-              <option value="NAIROBI_MIREMA_TREAT">NAIROBI_MIREMA_TREAT</option>
-              <option value="NAIROBI_KASARANI_SPORTS_VIEW">NAIROBI_KASARANI_SPORTS_VIEW</option>
-              <option value="NAIROBI_ST.FRANCIS_HOSPITAL">NAIROBI_ST.FRANCIS_HOSPITAL</option>
-              <option value="NAIROBI_ATHI_MARKET">NAIROBI_ATHI_MARKET</option>
-              <option value="NAIROBI_MIREMA_DRIVE">NAIROBI_MIREMA_DRIVE</option>
-              <option value="NAIROBI_RUAI_PCEA">NAIROBI_RUAI_PCEA</option>
-              <option value="KAMULU">KAMULU</option>
-              <option value="NAIROBI_GITHURAI_44">NAIROBI_GITHURAI_44</option>
-              <option value="NAIROBI_ZIMMERMAN_BASE">NAIROBI_ZIMMERMAN_BASE</option>
-              <option value="NAIROBI_KASARANI_MWIKI">NAIROBI_KASARANI_MWIKI</option>
-              <option value="NAIROBI_MUTHAIGA">NAIROBI_MUTHAIGA</option>
-              <option value="NAIROBI_RUAI_MAKONGENI">NAIROBI_RUAI_MAKONGENI</option>
-              <option value="NAIROBI_KAHAWA_WEST_ADC">NAIROBI_KAHAWA_WEST_ADC</option>
-              <option value="NAIROBI_MWENGENYE_CHEMICHEMI">NAIROBI_MWENGENYE_CHEMICHEMI</option>
-              <option value="NAIROBI_ZIMMERMAN_MIREMA_HEIGHTS">NAIROBI_ZIMMERMAN_MIREMA_HEIGHTS</option>
-              <option value="NAIROBI_WINDSOR_ESTATE">NAIROBI_WINDSOR_ESTATE</option>
-              <option value="NAIROBI_KAYOLE_SAIKA">NAIROBI_KAYOLE_SAIKA</option>
-              <option value="NAIROBI_KAHAWA_WEST">NAIROBI_KAHAWA_WEST</option>
-              <option value="NAIROBI_KAHAWA_WEST_NEW">NAIROBI_KAHAWA_WEST_NEW</option>
-              <option value="NAIROBI_RURII_GITHURAI_44">NAIROBI_RURII_GITHURAI_44</option>
-              <option value="NAIROBI_BURUBURU_FARM_NJIRU">NAIROBI_BURUBURU_FARM_NJIRU</option>
-              <option value="NAIROBI_KAHAWA_WEST_1">NAIROBI_KAHAWA_WEST_1</option>
-              <option value="NAIROBI_GITHURAI_MARKET">NAIROBI_GITHURAI_MARKET</option>
-              <option value="NAIROBI_NJIRU">NAIROBI_NJIRU</option>
-              <option value="NAIROBI_PAC_UNIVERSITY_ROYSAMBU">NAIROBI_PAC_UNIVERSITY_ROYSAMBU</option>
-              <option value="NAIROBI_RED_SOIL_FIFTH_STREET">NAIROBI_RED_SOIL_FIFTH_STREET</option>
-              <option value="NAIROBI_DANDORA_CHIEKO">NAIROBI_DANDORA_CHIEKO</option>
-              <option value="NAIROBI_SAIKA_MAKONGE">NAIROBI_SAIKA_MAKONGE</option>
-              <option value="NAIROBI_LINEKA">NAIROBI_LINEKA</option>
-              <option value="NAIROBI_RUAI_STAGE">NAIROBI_RUAI_STAGE</option>
-              <option value="NAIROBI_SUNTON_MUGUMOINI">NAIROBI_SUNTON_MUGUMOINI</option>
-              <option value="NAIROBI_THOME_MUTHAIGA_NORTH">NAIROBI_THOME_MUTHAIGA_NORTH</option>
-              <option value="NAIROBI_MWIKI_SECONDARY">NAIROBI_MWIKI_SECONDARY</option>
-              <option value="NAIROBI_NJIRU_CATHOLIC_CHURCH">NAIROBI_NJIRU_CATHOLIC_CHURCH</option>
-              <option value="NAIROBI_PENDRO_SEC_SCHOOL_GITHURAI_44">NAIROBI_PENDRO_SEC_SCHOOL_GITHURAI_44</option>
-              <option value="NAIROBI_SUNTON_GITUAMBA">NAIROBI_SUNTON_GITUAMBA</option>
-              <option value="NAIROBI_ROY_SAMBU_1">NAIROBI_ROY_SAMBU_1</option>
-              <option value="NAIROBI_NJIRU_MAJI_MAZURI">NAIROBI_NJIRU_MAJI_MAZURI</option>
-              <option value="NAIROBI_RUAI_POLICE_STATION">NAIROBI_RUAI_POLICE_STATION</option>
-              <option value="NAIROBI_TUSKER">NAIROBI_TUSKER</option>
-              <option value="NAIROBI_ZIMMERMAN">NAIROBI_ZIMMERMAN</option>
-              <option value="NAIROBI_MWIKI">NAIROBI_MWIKI</option>
-              <option value="NAIROBI_RUAI_SHOPPING_CENTER">NAIROBI_RUAI_SHOPPING_CENTER</option>
-              <option value="NAIROBI_RIDGEWAYS_WMX">NAIROBI_RIDGEWAYS_WMX</option>
-              <option value="NAIROBI_KIWANJA">NAIROBI_KIWANJA</option>
-              <option value="NAIROBI_THIKA_RD_MALL_IBS">NAIROBI_THIKA_RD_MALL_IBS</option>
-              <option value="NAIROBI_KU_TEACHING_REFFERAL">NAIROBI_KU_TEACHING_REFFERAL</option>
-              <option value="NAIROBI_GARDEN_NEW">NAIROBI_GARDEN_NEW</option>
-              <option value="NAIROBI_MWIKI_KASSMATT">NAIROBI_MWIKI_KASSMATT</option>
-              <option value="NAIROBI_THIKA_RD_CLAYWORKS">NAIROBI_THIKA_RD_CLAYWORKS</option>
-              <option value="NAIROBI_DANDORA_SHILANGA">NAIROBI_DANDORA_SHILANGA</option>
-              <option value="NAIROBI_KASARANI_WARREN">NAIROBI_KASARANI_WARREN</option>
-              <option value="NAIROBI_SOWETO">NAIROBI_SOWETO</option>
-              <option value="NAIROBI_KASARANI_SPORTS_COMPLEX">NAIROBI_KASARANI_SPORTS_COMPLEX</option>
-              <option value="NAIROBI_KU_BURUNDI_DRIVE">NAIROBI_KU_BURUNDI_DRIVE</option>
-              <option value="NAIROBI_NORTHERN_BYPASS_FOURWAYS">NAIROBI_NORTHERN_BYPASS_FOURWAYS</option>
-              <option value="NAIROBI_KAMITI_ROAD">NAIROBI_KAMITI_ROAD</option>
-              <option value="NAIROBI_NJIRU_CHOKAA_VIEW">NAIROBI_NJIRU_CHOKAA_VIEW</option>
-              <option value="NAIROBI_KAHAWA_WEST_SC">NAIROBI_KAHAWA_WEST_SC</option>
-              <option value="NAIROBI_KAMULU_NGUNDU">NAIROBI_KAMULU_NGUNDU</option>
-              <option value="NAIROBI_MWIKI_ABERDARES">NAIROBI_MWIKI_ABERDARES</option>
-              <option value="NAIROBI_MWIKI_MAJI_MAZURI">NAIROBI_MWIKI_MAJI_MAZURI</option>
-              <option value="NAIROBI_ZIMMERMAN_BASE_ATLAS">NAIROBI_ZIMMERMAN_BASE_ATLAS</option>
-              <option value="NAIROBI_WATATU_HOUSE">NAIROBI_WATATU_HOUSE</option>
-              <option value="NAIROBI_KASARANI_IMPROVEMENT">NAIROBI_KASARANI_IMPROVEMENT</option>
-              <option value="NAIROBI_ROYSAMBU_PRIMARY_ATC">NAIROBI_ROYSAMBU_PRIMARY_ATC</option>
-              <option value="NAIROBI_NJIRU_QUARRY">NAIROBI_NJIRU_QUARRY</option>
-              <option value="NAIROBI_SAFARI_PARK_THIKA_ROAD">NAIROBI_SAFARI_PARK_THIKA_ROAD</option>
-              <option value="MUTHAIGA_COUNTRY_CLUB">MUTHAIGA_COUNTRY_CLUB</option>
-              <option value="NAIROBI_RUAI_GREEN_SPRING">NAIROBI_RUAI_GREEN_SPRING</option>
-              <option value="NAIROBI_CHOKA_ESTATE_ATC">NAIROBI_CHOKA_ESTATE_ATC</option>
-              <option value="NAIROBI_NJATHAINI_ROAD">NAIROBI_NJATHAINI_ROAD</option>
-              <option value="NAIROBI_JACARANDA_ESTATE_KAMITI">NAIROBI_JACARANDA_ESTATE_KAMITI</option>
-              <option value="KAMULU_STAGE_26">KAMULU_STAGE_26</option>
-              <option value="NAIROBI_CHOKAA">NAIROBI_CHOKAA</option>
-              <option value="NAIROBI_SAIKA">NAIROBI_SAIKA</option>
-              <option value="NAIROBI_RIDGEWAYS_NEW">NAIROBI_RIDGEWAYS_NEW</option>
-              <option value="NAIROBI_KAHAWA_GARISSON">NAIROBI_KAHAWA_GARISSON</option>
-              <option value="NAIROBI_CLAY_CITY">NAIROBI_CLAY_CITY</option>
-              <option value="NAIROBI_RUAI_AREA">NAIROBI_RUAI_AREA</option>
-              <option value="NAIROBI_NSIS">NAIROBI_NSIS</option>
-              <option value="NAIROBI_EASTERN_BYPASS_ONYATTA">NAIROBI_EASTERN_BYPASS_ONYATTA</option>
-              <option value="NAIROBI_KU_STAFF_QUARTERS">NAIROBI_KU_STAFF_QUARTERS</option>
-              <option value="NAIROBI_MUTHAIGA_COUNTRY_VILLAS">NAIROBI_MUTHAIGA_COUNTRY_VILLAS</option>
-              <option value="NAIROBI_KASARANI">NAIROBI_KASARANI</option>
-              <option value="NAIROBI_GARDEN_CITY_IBS">NAIROBI_GARDEN_CITY_IBS</option>
-              <option value="NAIROBI_KASARANI_HUNTERS">NAIROBI_KASARANI_HUNTERS</option>
-              <option value="NAIROBI_RUAI_BONDENI">NAIROBI_RUAI_BONDENI</option>
-              <option value="NAIROBI_THOME_SAFARI_PARK">NAIROBI_THOME_SAFARI_PARK</option>
-              <option value="NAIROBI_KAHAWA_WEST_SAFCOM">NAIROBI_KAHAWA_WEST_SAFCOM</option>
-              <option value="NAIROBI_USIU_SC">NAIROBI_USIU_SC</option>
-              <option value="NAIROBI_MURERA_KASARANI">NAIROBI_MURERA_KASARANI</option>
-              <option value="NAIROBI_CLARETT_THOME">NAIROBI_CLARETT_THOME</option>
-              <option value="NAIROBI_SPORTS_VIEW_KASARANI">NAIROBI_SPORTS_VIEW_KASARANI</option>
-              <option value="NAIROBI_KAMULU_KASARANI_TECHNICAL">NAIROBI_KAMULU_KASARANI_TECHNICAL</option>
-              <option value="NAIROBI_KENYATTA_UNIVERSITY">NAIROBI_KENYATTA_UNIVERSITY</option>
-              <option value="NAIROBI_GARDEN_ESTATE_ROAD">NAIROBI_GARDEN_ESTATE_ROAD</option>
-              <option value="NAIROBI_KASARANI_CLAYWORKS">NAIROBI_KASARANI_CLAYWORKS</option>
-            </select>
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="lm">GA LM</label>
-            <input type="text" id="lm" name="lm" placeholder="GA LM" />
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="mtd">GA MTD</label>
-            <input type="text" id="mtd" name="mtd" placeholder="GA MTD" />
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="amLm">AM LM</label>
-            <input type="text" id="amLm" name="amLm" placeholder="AM LM" />
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="amaMtd">AMA MTD</label>
-            <input type="text" id="amaMtd" name="amaMtd" placeholder="AMA MTD" />
-          </div>
-          
-          <div class="form-group">
-            <label for="lines">LINES</label>
-            <input type="number" id="lines" name="lines" placeholder="0" min="0" />
-          </div>
-          
-          <div class="form-group">
-            <label for="given">GIVEN</label>
-            <input type="text" id="given" name="given" placeholder="GIVEN" />
-          </div>
+    <div class="app-tabs">
+      <button class="tab-button active" data-tab="retailer-tab">Retailer Management</button>
+      <button class="tab-button" data-tab="prospect-tab" id="prospectTabButton">Prospect Management</button>
+    </div>
+    
+    <!-- Retailer Management Tab -->
+    <div id="retailer-tab" class="tab-content active">
+      <div class="form-container">
+        <h2>Retailer Information</h2>
+        <form id="dataForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="msisdn">MSISDN *</label>
+              <input type="text" id="msisdn" name="msisdn" required placeholder="Enter MSISDN" />
+            </div>
+            
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input type="text" id="firstName" name="firstName" required placeholder="First Name" />
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input type="text" id="lastName" name="lastName" required placeholder="Last Name" />
+            </div>
+            
+            <div class="form-group">
+              <label for="siteId">Site ID *</label>
+              <select id="siteId" name="siteId" required>
+                <option value="">Select Site Location</option>
+                <option value="NAIROBI_KAYOLE_JUAKALI">NAIROBI_KAYOLE_JUAKALI</option>
+                <option value="NAIROBI_USIU">NAIROBI_USIU</option>
+                <option value="NAIROBI_MIREMA_TREAT">NAIROBI_MIREMA_TREAT</option>
+                <option value="NAIROBI_KASARANI_SPORTS_VIEW">NAIROBI_KASARANI_SPORTS_VIEW</option>
+                <option value="NAIROBI_ST.FRANCIS_HOSPITAL">NAIROBI_ST.FRANCIS_HOSPITAL</option>
+                <option value="NAIROBI_ATHI_MARKET">NAIROBI_ATHI_MARKET</option>
+                <option value="NAIROBI_MIREMA_DRIVE">NAIROBI_MIREMA_DRIVE</option>
+                <option value="NAIROBI_RUAI_PCEA">NAIROBI_RUAI_PCEA</option>
+                <option value="KAMULU">KAMULU</option>
+                <option value="NAIROBI_GITHURAI_44">NAIROBI_GITHURAI_44</option>
+                <option value="NAIROBI_ZIMMERMAN_BASE">NAIROBI_ZIMMERMAN_BASE</option>
+                <option value="NAIROBI_KASARANI_MWIKI">NAIROBI_KASARANI_MWIKI</option>
+                <option value="NAIROBI_MUTHAIGA">NAIROBI_MUTHAIGA</option>
+                <option value="NAIROBI_RUAI_MAKONGENI">NAIROBI_RUAI_MAKONGENI</option>
+                <option value="NAIROBI_KAHAWA_WEST_ADC">NAIROBI_KAHAWA_WEST_ADC</option>
+                <option value="NAIROBI_MWENGENYE_CHEMICHEMI">NAIROBI_MWENGENYE_CHEMICHEMI</option>
+                <option value="NAIROBI_ZIMMERMAN_MIREMA_HEIGHTS">NAIROBI_ZIMMERMAN_MIREMA_HEIGHTS</option>
+                <option value="NAIROBI_WINDSOR_ESTATE">NAIROBI_WINDSOR_ESTATE</option>
+                <option value="NAIROBI_KAYOLE_SAIKA">NAIROBI_KAYOLE_SAIKA</option>
+                <option value="NAIROBI_KAHAWA_WEST">NAIROBI_KAHAWA_WEST</option>
+                <option value="NAIROBI_KAHAWA_WEST_NEW">NAIROBI_KAHAWA_WEST_NEW</option>
+                <option value="NAIROBI_RURII_GITHURAI_44">NAIROBI_RURII_GITHURAI_44</option>
+                <option value="NAIROBI_BURUBURU_FARM_NJIRU">NAIROBI_BURUBURU_FARM_NJIRU</option>
+                <option value="NAIROBI_KAHAWA_WEST_1">NAIROBI_KAHAWA_WEST_1</option>
+                <option value="NAIROBI_GITHURAI_MARKET">NAIROBI_GITHURAI_MARKET</option>
+                <option value="NAIROBI_NJIRU">NAIROBI_NJIRU</option>
+                <option value="NAIROBI_PAC_UNIVERSITY_ROYSAMBU">NAIROBI_PAC_UNIVERSITY_ROYSAMBU</option>
+                <option value="NAIROBI_RED_SOIL_FIFTH_STREET">NAIROBI_RED_SOIL_FIFTH_STREET</option>
+                <option value="NAIROBI_DANDORA_CHIEKO">NAIROBI_DANDORA_CHIEKO</option>
+                <option value="NAIROBI_SAIKA_MAKONGE">NAIROBI_SAIKA_MAKONGE</option>
+                <option value="NAIROBI_LINEKA">NAIROBI_LINEKA</option>
+                <option value="NAIROBI_RUAI_STAGE">NAIROBI_RUAI_STAGE</option>
+                <option value="NAIROBI_SUNTON_MUGUMOINI">NAIROBI_SUNTON_MUGUMOINI</option>
+                <option value="NAIROBI_THOME_MUTHAIGA_NORTH">NAIROBI_THOME_MUTHAIGA_NORTH</option>
+                <option value="NAIROBI_MWIKI_SECONDARY">NAIROBI_MWIKI_SECONDARY</option>
+                <option value="NAIROBI_NJIRU_CATHOLIC_CHURCH">NAIROBI_NJIRU_CATHOLIC_CHURCH</option>
+                <option value="NAIROBI_PENDRO_SEC_SCHOOL_GITHURAI_44">NAIROBI_PENDRO_SEC_SCHOOL_GITHURAI_44</option>
+                <option value="NAIROBI_SUNTON_GITUAMBA">NAIROBI_SUNTON_GITUAMBA</option>
+                <option value="NAIROBI_ROY_SAMBU_1">NAIROBI_ROY_SAMBU_1</option>
+                <option value="NAIROBI_NJIRU_MAJI_MAZURI">NAIROBI_NJIRU_MAJI_MAZURI</option>
+                <option value="NAIROBI_RUAI_POLICE_STATION">NAIROBI_RUAI_POLICE_STATION</option>
+                <option value="NAIROBI_TUSKER">NAIROBI_TUSKER</option>
+                <option value="NAIROBI_ZIMMERMAN">NAIROBI_ZIMMERMAN</option>
+                <option value="NAIROBI_MWIKI">NAIROBI_MWIKI</option>
+                <option value="NAIROBI_RUAI_SHOPPING_CENTER">NAIROBI_RUAI_SHOPPING_CENTER</option>
+                <option value="NAIROBI_RIDGEWAYS_WMX">NAIROBI_RIDGEWAYS_WMX</option>
+                <option value="NAIROBI_KIWANJA">NAIROBI_KIWANJA</option>
+                <option value="NAIROBI_THIKA_RD_MALL_IBS">NAIROBI_THIKA_RD_MALL_IBS</option>
+                <option value="NAIROBI_KU_TEACHING_REFFERAL">NAIROBI_KU_TEACHING_REFFERAL</option>
+                <option value="NAIROBI_GARDEN_NEW">NAIROBI_GARDEN_NEW</option>
+                <option value="NAIROBI_MWIKI_KASSMATT">NAIROBI_MWIKI_KASSMATT</option>
+                <option value="NAIROBI_THIKA_RD_CLAYWORKS">NAIROBI_THIKA_RD_CLAYWORKS</option>
+                <option value="NAIROBI_DANDORA_SHILANGA">NAIROBI_DANDORA_SHILANGA</option>
+                <option value="NAIROBI_KASARANI_WARREN">NAIROBI_KASARANI_WARREN</option>
+                <option value="NAIROBI_SOWETO">NAIROBI_SOWETO</option>
+                <option value="NAIROBI_KASARANI_SPORTS_COMPLEX">NAIROBI_KASARANI_SPORTS_COMPLEX</option>
+                <option value="NAIROBI_KU_BURUNDI_DRIVE">NAIROBI_KU_BURUNDI_DRIVE</option>
+                <option value="NAIROBI_NORTHERN_BYPASS_FOURWAYS">NAIROBI_NORTHERN_BYPASS_FOURWAYS</option>
+                <option value="NAIROBI_KAMITI_ROAD">NAIROBI_KAMITI_ROAD</option>
+                <option value="NAIROBI_NJIRU_CHOKAA_VIEW">NAIROBI_NJIRU_CHOKAA_VIEW</option>
+                <option value="NAIROBI_KAHAWA_WEST_SC">NAIROBI_KAHAWA_WEST_SC</option>
+                <option value="NAIROBI_KAMULU_NGUNDU">NAIROBI_KAMULU_NGUNDU</option>
+                <option value="NAIROBI_MWIKI_ABERDARES">NAIROBI_MWIKI_ABERDARES</option>
+                <option value="NAIROBI_MWIKI_MAJI_MAZURI">NAIROBI_MWIKI_MAJI_MAZURI</option>
+                <option value="NAIROBI_ZIMMERMAN_BASE_ATLAS">NAIROBI_ZIMMERMAN_BASE_ATLAS</option>
+                <option value="NAIROBI_WATATU_HOUSE">NAIROBI_WATATU_HOUSE</option>
+                <option value="NAIROBI_KASARANI_IMPROVEMENT">NAIROBI_KASARANI_IMPROVEMENT</option>
+                <option value="NAIROBI_ROYSAMBU_PRIMARY_ATC">NAIROBI_ROYSAMBU_PRIMARY_ATC</option>
+                <option value="NAIROBI_NJIRU_QUARRY">NAIROBI_NJIRU_QUARRY</option>
+                <option value="NAIROBI_SAFARI_PARK_THIKA_ROAD">NAIROBI_SAFARI_PARK_THIKA_ROAD</option>
+                <option value="MUTHAIGA_COUNTRY_CLUB">MUTHAIGA_COUNTRY_CLUB</option>
+                <option value="NAIROBI_RUAI_GREEN_SPRING">NAIROBI_RUAI_GREEN_SPRING</option>
+                <option value="NAIROBI_CHOKA_ESTATE_ATC">NAIROBI_CHOKA_ESTATE_ATC</option>
+                <option value="NAIROBI_NJATHAINI_ROAD">NAIROBI_NJATHAINI_ROAD</option>
+                <option value="NAIROBI_JACARANDA_ESTATE_KAMITI">NAIROBI_JACARANDA_ESTATE_KAMITI</option>
+                <option value="KAMULU_STAGE_26">KAMULU_STAGE_26</option>
+                <option value="NAIROBI_CHOKAA">NAIROBI_CHOKAA</option>
+                <option value="NAIROBI_SAIKA">NAIROBI_SAIKA</option>
+                <option value="NAIROBI_RIDGEWAYS_NEW">NAIROBI_RIDGEWAYS_NEW</option>
+                <option value="NAIROBI_KAHAWA_GARISSON">NAIROBI_KAHAWA_GARISSON</option>
+                <option value="NAIROBI_CLAY_CITY">NAIROBI_CLAY_CITY</option>
+                <option value="NAIROBI_RUAI_AREA">NAIROBI_RUAI_AREA</option>
+                <option value="NAIROBI_NSIS">NAIROBI_NSIS</option>
+                <option value="NAIROBI_EASTERN_BYPASS_ONYATTA">NAIROBI_EASTERN_BYPASS_ONYATTA</option>
+                <option value="NAIROBI_KU_STAFF_QUARTERS">NAIROBI_KU_STAFF_QUARTERS</option>
+                <option value="NAIROBI_MUTHAIGA_COUNTRY_VILLAS">NAIROBI_MUTHAIGA_COUNTRY_VILLAS</option>
+                <option value="NAIROBI_KASARANI">NAIROBI_KASARANI</option>
+                <option value="NAIROBI_GARDEN_CITY_IBS">NAIROBI_GARDEN_CITY_IBS</option>
+                <option value="NAIROBI_KASARANI_HUNTERS">NAIROBI_KASARANI_HUNTERS</option>
+                <option value="NAIROBI_RUAI_BONDENI">NAIROBI_RUAI_BONDENI</option>
+                <option value="NAIROBI_THOME_SAFARI_PARK">NAIROBI_THOME_SAFARI_PARK</option>
+                <option value="NAIROBI_KAHAWA_WEST_SAFCOM">NAIROBI_KAHAWA_WEST_SAFCOM</option>
+                <option value="NAIROBI_USIU_SC">NAIROBI_USIU_SC</option>
+                <option value="NAIROBI_MURERA_KASARANI">NAIROBI_MURERA_KASARANI</option>
+                <option value="NAIROBI_CLARETT_THOME">NAIROBI_CLARETT_THOME</option>
+                <option value="NAIROBI_SPORTS_VIEW_KASARANI">NAIROBI_SPORTS_VIEW_KASARANI</option>
+                <option value="NAIROBI_KAMULU_KASARANI_TECHNICAL">NAIROBI_KAMULU_KASARANI_TECHNICAL</option>
+                <option value="NAIROBI_KENYATTA_UNIVERSITY">NAIROBI_KENYATTA_UNIVERSITY</option>
+                <option value="NAIROBI_GARDEN_ESTATE_ROAD">NAIROBI_GARDEN_ESTATE_ROAD</option>
+                <option value="NAIROBI_KASARANI_CLAYWORKS">NAIROBI_KASARANI_CLAYWORKS</option>
+              </select>
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="lm">GA LM</label>
+              <input type="text" id="lm" name="lm" placeholder="GA LM" />
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="mtd">GA MTD</label>
+              <input type="text" id="mtd" name="mtd" placeholder="GA MTD" />
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="amLm">AM LM</label>
+              <input type="text" id="amLm" name="amLm" placeholder="AM LM" />
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="amaMtd">AMA MTD</label>
+              <input type="text" id="amaMtd" name="amaMtd" placeholder="AMA MTD" />
+            </div>
+            
+            <div class="form-group">
+              <label for="lines">LINES</label>
+              <input type="number" id="lines" name="lines" placeholder="0" min="0" />
+            </div>
+            
+            <div class="form-group">
+              <label for="given">GIVEN</label>
+              <input type="text" id="given" name="given" placeholder="GIVEN" />
+            </div>
 
-          <div class="form-group">
-            <label for="floatServiced">Float Serviced</label>
-            <input type="text" id="floatServiced" name="floatServiced" placeholder="Float Serviced" />
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="qsso">QSSO</label>
-            <select id="qsso" name="qsso">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="qama">QAMA</label>
-            <select id="qama" name="qama">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="kcbAgents">KCB Agents</label>
-            <select id="kcbAgents" name="kcbAgents">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="newRecruitment">New Recruitment</label>
-            <select id="newRecruitment" name="newRecruitment">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-          
-          <div class="form-group tsm-only">
-            <label for="visitation">Visitation Status</label>
-            <select id="visitation" name="visitation">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
+            <div class="form-group">
+              <label for="floatServiced">Float Serviced</label>
+              <input type="text" id="floatServiced" name="floatServiced" placeholder="Float Serviced" />
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="qsso">QSSO</label>
+              <select id="qsso" name="qsso">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="qama">QAMA</label>
+              <select id="qama" name="qama">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="kcbAgents">KCB Agents</label>
+              <select id="kcbAgents" name="kcbAgents">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="newRecruitment">New Recruitment</label>
+              <select id="newRecruitment" name="newRecruitment">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            
+            <div class="form-group tsm-only">
+              <label for="visitation">Visitation Status</label>
+              <select id="visitation" name="visitation">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
 
-          <div class="form-group tsm-only">
-            <label for="visitationDate">Visitation Date *</label>
-            <input type="date" id="visitationDate" name="visitationDate" required />
-          </div>
+            <div class="form-group tsm-only">
+              <label for="visitationDate">Visitation Date *</label>
+              <div class="input-with-lock">
+                <input type="date" id="visitationDate" name="visitationDate" required />
+                <span class="lock" id="visitationDateLock" title="Auto-captured, not editable">🔒</span>
+              </div>
+            </div>
 
-          <div class="form-group tsm-only">
-            <label for="visitationTime">Visitation Time *</label>
-            <input type="time" id="visitationTime" name="visitationTime" required />
+            <div class="form-group tsm-only">
+              <label for="visitationTime">Visitation Time *</label>
+              <div class="input-with-lock">
+                <input type="time" id="visitationTime" name="visitationTime" required />
+                <span class="lock" id="visitationTimeLock" title="Auto-captured, not editable">🔒</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Add Retailer</button>
+            <button type="button" id="clearBtn" class="btn-secondary">Clear Form</button>
+          </div>
+        </form>
+        
+        <div class="data-actions">
+          <button id="downloadBtn" class="btn-success">Export to CSV</button>
+          <button id="clearAllBtn" class="btn-danger">Clear All Data</button>
+          <div class="data-counter">
+            Entries: <span id="entryCount">0</span>/2000
           </div>
         </div>
         
-        <div class="form-actions">
-          <button type="submit" class="btn-primary">Add Retailer</button>
-          <button type="button" id="clearBtn" class="btn-secondary">Clear Form</button>
-        </div>
-      </form>
-      
-      <div class="data-actions">
-        <button id="downloadBtn" class="btn-success">Export to CSV</button>
-        <button id="clearAllBtn" class="btn-danger">Clear All Data</button>
-        <div class="data-counter">
-          Entries: <span id="entryCount">0</span>/2000
+        <div class="table-container">
+          <div class="table-controls">
+            <div class="search-area">
+              <label for="searchInput">Search:</label>
+              <input id="searchInput" type="search" placeholder="Search MSISDN, name, site..." />
+            </div>
+            <div class="page-size-area">
+              <label for="pageSizeSelect">Page size:</label>
+              <select id="pageSizeSelect">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <div class="export-area">
+              <button id="downloadBtn" class="btn-success">Export View to CSV</button>
+            </div>
+          </div>
+          <h3>Stored Data</h3>
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th data-sort="msisdn">MSISDN</th>
+                <th data-sort="firstName">First Name</th>
+                <th data-sort="lastName">Last Name</th>
+                <th data-sort="siteId">Site ID</th>
+                <th class="tsm-only" data-sort="lm">GA LM</th>
+                <th class="tsm-only" data-sort="mtd">GA MTD</th>
+                <th class="tsm-only" data-sort="amLm">AM LM</th>
+                <th class="tsm-only" data-sort="amaMtd">AMA MTD</th>
+                <th data-sort="lines">LINES</th>
+                <th data-sort="given">GIVEN</th>
+                <th data-sort="floatServiced">Float Serviced</th>
+                <th class="tsm-only" data-sort="qsso">QSSO</th>
+                <th class="tsm-only" data-sort="qama">QAMA</th>
+                <th class="tsm-only" data-sort="kcbAgents">KCB Agents</th>
+                <th data-sort="newRecruitment">New Recruitment</th>
+                <th class="tsm-only" data-sort="visitation">Visitation Status</th>
+                <th class="tsm-only" data-sort="visitationDate">Visitation Date</th>
+                <th class="tsm-only" data-sort="visitationTime">Visitation Time</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="pagination" class="pagination"></div>
         </div>
       </div>
-      
-      <div class="table-container">
-        <h3>Stored Data</h3>
-        <table id="dataTable">
-          <thead>
-            <tr>
-              <th>MSISDN</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Site ID</th>
-              <th class="tsm-only">GA LM</th>
-              <th class="tsm-only">GA MTD</th>
-              <th class="tsm-only">AM LM</th>
-              <th class="tsm-only">AMA MTD</th>
-              <th>LINES</th>
-              <th>GIVEN</th>
-              <th>Float Serviced</th>
-              <th class="tsm-only">QSSO</th>
-              <th class="tsm-only">QAMA</th>
-              <th class="tsm-only">KCB Agents</th>
-              <th>New Recruitment</th>
-              <th class="tsm-only">Visitation Status</th>
-              <th class="tsm-only">Visitation Date</th>
-              <th class="tsm-only">Visitation Time</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+    </div>
+    
+    <!-- Prospect Management Tab -->
+    <div id="prospect-tab" class="tab-content">
+      <div class="form-container">
+        <h2>Prospect Management</h2>
+        
+        <!-- Add Prospect Form -->
+        <form id="prospectForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="prospectMsisdn">MSISDN *</label>
+              <input type="text" id="prospectMsisdn" name="prospectMsisdn" required placeholder="Enter MSISDN" />
+            </div>
+            
+            <div class="form-group">
+              <label for="prospectFirstName">First Name *</label>
+              <input type="text" id="prospectFirstName" name="prospectFirstName" required placeholder="First Name" />
+            </div>
+            
+            <div class="form-group">
+              <label for="prospectLastName">Last Name *</label>
+              <input type="text" id="prospectLastName" name="prospectLastName" required placeholder="Last Name" />
+            </div>
+            
+            <div class="form-group">
+              <label for="prospectLocation">Location *</label>
+              <input type="text" id="prospectLocation" name="prospectLocation" required placeholder="Business Location" />
+            </div>
+            
+            <div class="form-group">
+              <label for="prospectBusinessType">Business Type</label>
+              <select id="prospectBusinessType" name="prospectBusinessType">
+                <option value="General Shop">General Shop</option>
+                <option value="Kiosk">Kiosk</option>
+                <option value="Supermarket">Supermarket</option>
+                <option value="Pharmacy">Pharmacy</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="prospectInterestLevel">Interest Level</label>
+              <select id="prospectInterestLevel" name="prospectInterestLevel">
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="followUpDate">Follow-up Date *</label>
+              <input type="date" id="followUpDate" name="followUpDate" required />
+            </div>
+            
+            <div class="form-group">
+              <label for="followUpNotes">Follow-up Notes</label>
+              <textarea id="followUpNotes" name="followUpNotes" placeholder="Notes for next follow-up" rows="3"></textarea>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Add Prospect</button>
+            <button type="button" id="clearProspectBtn" class="btn-secondary">Clear Form</button>
+          </div>
+        </form>
+        
+        <div class="prospect-actions">
+          <button id="downloadProspectsBtn" class="btn-success">Export Prospects to CSV</button>
+          <button id="clearAllProspectsBtn" class="btn-danger">Clear All Prospects</button>
+          <div class="data-counter">
+            Prospects: <span id="prospectCount">0</span>/500
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <div class="table-controls">
+            <div class="search-area">
+              <label for="prospectSearchInput">Search:</label>
+              <input id="prospectSearchInput" type="search" placeholder="Search MSISDN, name, location..." />
+            </div>
+            <div class="page-size-area">
+              <label for="prospectPageSizeSelect">Page size:</label>
+              <select id="prospectPageSizeSelect">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+          <h3>Prospect List</h3>
+          <table id="prospectTable">
+            <thead>
+              <tr>
+                <th data-sort="prospectMsisdn">MSISDN</th>
+                <th data-sort="prospectFirstName">First Name</th>
+                <th data-sort="prospectLastName">Last Name</th>
+                <th data-sort="prospectLocation">Location</th>
+                <th data-sort="prospectBusinessType">Business Type</th>
+                <th data-sort="prospectInterestLevel">Interest Level</th>
+                <th data-sort="followUpDate">Follow-up Date</th>
+                <th data-sort="status">Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="prospectPagination" class="pagination"></div>
+        </div>
       </div>
     </div>
     

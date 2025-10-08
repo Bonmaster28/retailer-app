@@ -1,27 +1,25 @@
+
 {
-  "name": "RetailerPro - Data Management",
+  "name": "RetailerPro",
   "short_name": "RetailerPro",
-  "description": "Professional retailer data management application",
-  "start_url": "./index.html",
+  "description": "Professional Retailer Data Management App",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#b30000",
+  "background_color": "#ffffff",
   "theme_color": "#b30000",
   "orientation": "portrait-primary",
-  "scope": "./",
-  "lang": "en-US",
-  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "icons/192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icons/512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ]
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en"
 }
