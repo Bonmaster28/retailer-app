@@ -212,7 +212,7 @@
     const phoneNumber = document.getElementById('phoneNumber').value;
     const userRole = document.getElementById('userRole').value;
     
-    if (phoneNumber === '784478620' && userRole === 'DSR') {
+    if (phoneNumber === '7846478620' && userRole === 'DSR') {
       const demoOtp = '123456';
       otpData = { phoneNumber, otp: demoOtp, timestamp: Date.now() };
       localStorage.setItem('otpData', JSON.stringify(otpData));
