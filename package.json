@@ -1,0 +1,32 @@
+{
+  "name": "otp-system",
+  "version": "1.0.0",
+  "description": "Complete OTP generation, validation, and delivery system",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node test/otp.test.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "twilio": "^4.19.0",
+    "nodemailer": "^6.9.7",
+    "crypto": "^1.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express-rate-limit": "^7.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "otp",
+    "authentication",
+    "sms",
+    "email",
+    "verification"
+  ],
+  "author": "",
+  "license": "MIT"
+}
