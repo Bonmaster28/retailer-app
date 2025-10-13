@@ -302,11 +302,17 @@
 
             <div class="form-group">
               <label for="firstSerial">First Serial Number</label>
-              <input type="text" id="firstSerial" name="firstSerial" placeholder="Enter first serial number" />
+              <input type="text" id="firstSerial" name="firstSerial"
+                     placeholder="Enter first serial number"
+                     data-placeholder-dsr="Enter first serial (DSR format e.g. DSR-000001)"
+                     data-placeholder-tsm="Enter first serial (TSM format e.g. TSM-000001)" />
             </div>
             <div class="form-group">
               <label for="lastSerial">Last Serial Number</label>
-              <input type="text" id="lastSerial" name="lastSerial" placeholder="Enter last serial number" />
+              <input type="text" id="lastSerial" name="lastSerial"
+                     placeholder="Enter last serial number"
+                     data-placeholder-dsr="Enter last serial (DSR format e.g. DSR-000100)"
+                     data-placeholder-tsm="Enter last serial (TSM format e.g. TSM-000100)" />
             </div>
           </div>
           
@@ -491,6 +497,32 @@
   </div>
   
   <script src="script.js"></script>
+  <script>
+    // Update first/last serial placeholders based on selected user role (DSR / TSM)
+    (function () {
+      const roleSelect = document.getElementById('userRole');
+      const firstSerial = document.getElementById('firstSerial');
+      const lastSerial = document.getElementById('lastSerial');
+
+      function applyPlaceholders(role) {
+        if (!firstSerial || !lastSerial) return;
+        const r = (role || '').toUpperCase();
+        if (r === 'TSM') {
+          firstSerial.placeholder = firstSerial.dataset.placeholderTsm || firstSerial.placeholder;
+          lastSerial.placeholder = lastSerial.dataset.placeholderTsm || lastSerial.placeholder;
+        } else {
+          firstSerial.placeholder = firstSerial.dataset.placeholderDsr || firstSerial.placeholder;
+          lastSerial.placeholder = lastSerial.dataset.placeholderDsr || lastSerial.placeholder;
+        }
+      }
+
+      if (roleSelect) {
+        roleSelect.addEventListener('change', () => applyPlaceholders(roleSelect.value));
+        // initialize on load
+        applyPlaceholders(roleSelect.value);
+      }
+    })();
+  </script>
 
   <!-- Onboarding modal (one-time) -->
   <div id="onboardingModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="onboardingTitle">
