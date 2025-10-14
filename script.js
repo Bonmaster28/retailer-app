@@ -243,8 +243,116 @@
   }
 
   // Retailer form submission
-  function handleFormSubmit(e) {
+  
+
+  // --- BA data management (require BA filled per site before adding retailers) ---
+  const baForm = document.getElementById('baForm');
+  const baSiteSelect = document.getElementById('baSiteId');
+  const baStatus = document.getElementById('baStatus');
+  const clearBaBtn = document.getElementById('clearBaBtn');
+
+  // copy site options from main siteId select if present
+  function copySiteOptions() {
+    const mainSite = document.getElementById('siteId');
+    if (!mainSite || !baSiteSelect) return;
+    baSiteSelect.innerHTML = '<option value="">Select Site Location</option>' + mainSite.innerHTML;
+  }
+
+  // Load BA data store (mapping siteId -> {officer, notes, savedBy, timestamp})
+  function loadBaStore() {
+    return JSON.parse(localStorage.getItem('baStore') || '{}');
+  }
+
+  function saveBaStore(store) {
+    localStorage.setItem('baStore', JSON.stringify(store));
+  }
+
+  function updateBaStatus() {
+    const store = loadBaStore();
+    // show count of saved BA entries
+    const count = Object.keys(store).length;
+    baStatus.textContent = count ? `${count} saved` : 'Not saved';
+  }
+
+  if (baForm) {
+    copySiteOptions();
+    baForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!currentUser) {
+        showNotification('Please login first', 'error');
+        return;
+      }
+      const siteId = document.getElementById('baSiteId').value;
+      const officer = document.getElementById('baOfficer').value.trim();
+      const notes = document.getElementById('baNotes').value.trim();
+
+      if (!siteId || !officer) {
+        showNotification('Please fill required BA fields (Site & Officer)', 'error');
+        return;
+      }
+
+      const store = loadBaStore();
+      store[siteId] = {
+        officer,
+        notes,
+        savedBy: currentUser.phoneNumber,
+        role: currentUser.role,
+        timestamp: new Date().toISOString()
+      };
+      saveBaStore(store);
+      updateBaStatus();
+      showNotification('BA data saved for site: ' + siteId, 'success');
+    });
+
+    clearBaBtn.addEventListener('click', function() {
+      const siteId = document.getElementById('baSiteId').value;
+      if (!siteId) {
+        // clear all
+        if (confirm('Clear ALL BA data?')) {
+          saveBaStore({});
+          updateBaStatus();
+          showNotification('All BA data cleared', 'success');
+        }
+      } else {
+        const store = loadBaStore();
+        if (store[siteId]) {
+          delete store[siteId];
+          saveBaStore(store);
+          updateBaStatus();
+          showNotification('BA data cleared for site: ' + siteId, 'success');
+        } else {
+          showNotification('No BA data found for site: ' + siteId, 'error');
+        }
+      }
+    });
+
+    updateBaStatus();
+  }
+
+  // Modify handleFormSubmit to require BA data for the selected site
+  const originalHandleFormSubmitIndex = txt.indexOf('function handleFormSubmit');
+function handleFormSubmit(e) {
     e.preventDefault();
+
+    // REQUIRE: BA data for this site must be saved before adding retailers
+    try {
+      const siteField = document.getElementById('siteId');
+      const siteValue = siteField ? siteField.value : (form.getAttribute('data-site') || '');
+      const baStore = loadBaStore();
+      if (!baStore[siteValue]) {
+        showNotification('Please save BA data for the selected Site ID before adding retailers.', 'error');
+        return;
+      }
+      // Allow only DSR/TSM roles to add retailers
+      if (!currentUser || (currentUser.role !== 'DSR' && currentUser.role !== 'TSM')) {
+        showNotification('Only DSR or TSM roles can add retailers.', 'error');
+        return;
+      }
+    } catch (err) {
+      console.error('BA check error', err);
+    }
+
+
     
     const formData = new FormData(form);
     const entry = Object.fromEntries(formData.entries());

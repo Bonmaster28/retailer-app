@@ -84,7 +84,34 @@
     <!-- Retailer Management Tab -->
     <div id="retailer-tab" class="tab-content active">
       <div class="form-container">
-        <h2>Retailer Information</h2>
+        
+      <h2>BA (Business Area) Data — Required before adding retailers</h2>
+      <form id="baForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="baSiteId">Site ID *</label>
+            <select id="baSiteId" name="baSiteId" required>
+              <option value="">Select Site Location</option>
+              <!-- same options as siteId will be used by script to copy options -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="baOfficer">BA Officer Name *</label>
+            <input type="text" id="baOfficer" name="baOfficer" placeholder="BA Officer Name" required/>
+          </div>
+          <div class="form-group">
+            <label for="baNotes">Notes</label>
+            <input type="text" id="baNotes" name="baNotes" placeholder="Additional notes (optional)" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" id="saveBaBtn" class="btn-primary">Save BA Data</button>
+          <button type="button" id="clearBaBtn" class="btn-secondary">Clear BA Data</button>
+          <span id="baStatus" style="margin-left:1rem;font-weight:600;color:#0a7">Not saved</span>
+        </div>
+      </form>
+      <hr/>
+<h2>Retailer Information</h2>
         <form id="dataForm">
           <div class="form-grid">
             <div class="form-group">
